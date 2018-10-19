@@ -4,8 +4,8 @@ import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spaceworms.models.Board;
-import spaceworms.models.Error;
 import spaceworms.models.JSONWrapperModel;
+import spaceworms.models.Square;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -57,6 +57,24 @@ public class APIService {
         }
 
         return optionalBoard;
+    }
+
+    public Optional<Square> getSquare(int boardId, int squareNumber) {
+        Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards/" + boardId + "/" + squareNumber);
+        if (response == null) {
+            return null;
+        }
+
+        JSONWrapperModel<Square> jsonWrapperModel = new JSONWrapperModel<>();
+        Optional<Square> optionalSquare = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
+
+        try {
+            response.getKey().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return optionalSquare;
     }
 
     private static Pair<InputStream, Integer> getInputStreamForAPIEndpoint(String apiEndpointURL) {
