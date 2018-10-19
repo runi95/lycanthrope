@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class APIService {
@@ -22,23 +23,14 @@ public class APIService {
     @Value("${api.url}")
     private String API_URL;
 
-    public List<Board> getBoards() {
+    public Optional<List<Board>> getBoards() {
         Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards");
         if (response == null) {
             return null;
         }
 
-        List<Board> boards = null;
-        if (response.getValue() == HttpURLConnection.HTTP_OK) {
-            JSONWrapperModel<List<Board>> jsonWrapperModel = new JSONWrapperModel<>();
-            jsonWrapperModel.readJSONValueFromStream(response.getKey());
-        } else {
-            JSONWrapperModel<Error> jsonWrapperModel = new JSONWrapperModel<>();
-            Error error = jsonWrapperModel.readJSONValueFromStream(response.getKey());
-
-            // For now we simply print errors we get from the API
-            printError(error);
-        }
+        JSONWrapperModel<List<Board>> jsonWrapperModel = new JSONWrapperModel<>();
+        Optional<List<Board>> optionalBoards = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
 
         try {
             response.getKey().close();
@@ -46,7 +38,25 @@ public class APIService {
             e.printStackTrace();
         }
 
-        return boards;
+        return optionalBoards;
+    }
+
+    public Optional<Board> getBoard(int boardId) {
+        Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards/" + boardId);
+        if (response == null) {
+            return null;
+        }
+
+        JSONWrapperModel<Board> jsonWrapperModel = new JSONWrapperModel<>();
+        Optional<Board> optionalBoard = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
+
+        try {
+            response.getKey().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return optionalBoard;
     }
 
     private static Pair<InputStream, Integer> getInputStreamForAPIEndpoint(String apiEndpointURL) {
@@ -91,18 +101,5 @@ public class APIService {
         }
 
         return new Pair<>(inputStream, responseCode);
-    }
-
-    // TODO: Change this method from print to log
-    private static void printError(Error error) {
-        System.err.printf("%s\t Error(%d): %s\n", error.getLevel(), error.getCode(), error.getMessage());
-    }
-
-    public static void main(String[] args) {
-        APIService api = new APIService();
-        List<Board> boards = api.getBoards();
-        boards.forEach((board) -> System.out.printf("%s[%d]: %s\n", board.getName(), board.getId(), board.getDescription()));
-
-        System.out.println(boards);
     }
 }
