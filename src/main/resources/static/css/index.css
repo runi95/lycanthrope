@@ -1,0 +1,13 @@
+.login-box {
+    background: #202020;
+    border-radius: 6px;
+    padding: 18px;
+}
+
+.input-opaque {
+    opacity: 0.9;
+}
+
+.margin-left-auto {
+    margin-left: auto;
+}
