@@ -9,6 +9,7 @@ import spaceworms.models.Message;
 import spaceworms.services.APIService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class WebSocketController {
@@ -19,11 +20,16 @@ public class WebSocketController {
     @MessageMapping("/getBoards")
     @SendToUser(value = "/endpoint/private")
     public Message<List<Board>> getBoards() {
-
-        // TODO: Find a better way to handle the api, maybe a wrapper service that returns messages?
+        Optional<List<Board>> optionalBoards = api.getBoards(null);
         Message<List<Board>> message = new Message<>();
-        message.setContent(api.getBoards());
-        message.setStatus(200);
+
+        if (optionalBoards.isPresent()) {
+            message.setContent(optionalBoards.get());
+            message.setStatus(200);
+        } else {
+            message.setContent(null);
+            message.setStatus(500);
+        }
 
         return message;
     }
