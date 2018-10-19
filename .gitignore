@@ -2,3 +2,4 @@
 SpaceWorms.iml
 target
 src/main/resources/application.properties
+SpaceWormsDB.mv.db
