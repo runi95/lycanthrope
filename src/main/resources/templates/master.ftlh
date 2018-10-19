@@ -15,6 +15,9 @@
     <script defer src="/webjars/jquery/2.1.4/jquery.min.js"></script>
     <script defer src="/webjars/bootstrap/4.1.0/js/bootstrap.min.js"></script>
     <script defer src="/js/master.js"></script>
+    <script defer src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script defer src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script defer src="/js/stomp.js"></script>
     <link rel="stylesheet"
           href="/webjars/bootstrap/4.1.0/css/bootstrap.min.css" async/>
     <link rel="stylesheet"
