@@ -1,12 +1,11 @@
 package spaceworms.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spaceworms.models.Board;
 import spaceworms.models.Error;
+import spaceworms.models.JSONWrapperModel;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -31,30 +30,14 @@ public class APIService {
 
         List<Board> boards = null;
         if (response.getValue() == HttpURLConnection.HTTP_OK) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            TypeReference<List<Board>> typeReference = new TypeReference<List<Board>>() {};
-
-            try {
-                boards = objectMapper.readValue(response.getKey(), typeReference);
-            } catch (IOException e) {
-                System.err.println("Could not parse JSON object, please see the stacktrace below for more information.");
-                e.printStackTrace();
-
-                return null;
-            }
+            JSONWrapperModel<List<Board>> jsonWrapperModel = new JSONWrapperModel<>();
+            jsonWrapperModel.readJSONValueFromStream(response.getKey());
         } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            TypeReference<Error> typeReference = new TypeReference<Error>() {};
+            JSONWrapperModel<Error> jsonWrapperModel = new JSONWrapperModel<>();
+            Error error = jsonWrapperModel.readJSONValueFromStream(response.getKey());
 
-            try {
-                Error error = objectMapper.readValue(response.getKey(), typeReference);
-                printError(error);
-            } catch (IOException e) {
-                System.err.println("Could not parse JSON object, please see the stacktrace below for more information.");
-                e.printStackTrace();
-
-                return null;
-            }
+            // For now we simply print errors we get from the API
+            printError(error);
         }
 
         try {
@@ -110,6 +93,7 @@ public class APIService {
         return new Pair<>(inputStream, responseCode);
     }
 
+    // TODO: Change this method from print to log
     private static void printError(Error error) {
         System.err.printf("%s\t Error(%d): %s\n", error.getLevel(), error.getCode(), error.getMessage());
     }
