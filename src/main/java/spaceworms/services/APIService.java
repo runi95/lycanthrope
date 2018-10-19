@@ -24,7 +24,7 @@ public class APIService {
     private String API_URL;
 
     public Optional<List<Board>> getBoards(String filter) {
-        Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards" + (filter.length() > 0 ? "?" + filter : ""));
+        Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards" + (filter != null && filter.length() > 0 ? "?" + filter : ""));
         if (response == null) {
             return null;
         }
