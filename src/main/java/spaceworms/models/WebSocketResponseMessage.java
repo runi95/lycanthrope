@@ -1,11 +1,11 @@
 package spaceworms.models;
 
-public class Message<E> {
+public class WebSocketResponseMessage<E> {
 
     private int status;
     private E content;
 
-    public Message() {}
+    public WebSocketResponseMessage() {}
 
     public int getStatus() { return this.status; }
     public void setStatus(int status) { this.status = status; }

@@ -5,7 +5,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import spaceworms.models.Board;
-import spaceworms.models.Message;
+import spaceworms.models.WebSocketResponseMessage;
 import spaceworms.services.APIService;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public class WebSocketController {
 
     @MessageMapping("/getBoards")
     @SendToUser(value = "/endpoint/private")
-    public Message<List<Board>> getBoards() {
+    public WebSocketResponseMessage<List<Board>> getBoards() {
         Optional<List<Board>> optionalBoards = api.getBoards(null);
-        Message<List<Board>> message = new Message<>();
+        WebSocketResponseMessage<List<Board>> message = new WebSocketResponseMessage<>();
 
         if (optionalBoards.isPresent()) {
             message.setContent(optionalBoards.get());

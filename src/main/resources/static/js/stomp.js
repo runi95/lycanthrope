@@ -75,3 +75,7 @@ function disconnect() {
 function getBoards() {
     stompClient.send("/websock/getBoards", {}, null);
 }
+
+function setNickname(name) {
+    stompClient.send("/websock/setNick", {}, JSON.stringify({"name": name}))
+}

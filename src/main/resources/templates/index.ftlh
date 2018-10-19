@@ -13,7 +13,7 @@
             </div>
             <div class="col-8 offset-2">
                 <div class="login-box">
-                    <form id="loginForm" name="loginForm" action="/login" method="POST">
+                    <form id="loginForm" name="loginForm" action="javascript:void(0);" method="POST">
 				        <#if _csrf??>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         </#if>
@@ -28,7 +28,7 @@
                         </div>
                         <div class="d-flex">
                             <div class="margin-left-auto">
-                                <button type="submit" class="btn btn-primary">Login</button>
+                                <button type="submit" class="btn btn-primary">Join</button>
                             </div>
                         </div>
                     </form>
