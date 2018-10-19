@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.List;
 
 @Service
-public class API {
+public class APIService {
 
     private static final String USER_AGENT = "Mozilla/5.0";
 
@@ -115,7 +115,7 @@ public class API {
     }
 
     public static void main(String[] args) {
-        API api = new API();
+        APIService api = new APIService();
         List<Board> boards = api.getBoards();
         boards.forEach((board) -> System.out.printf("%s[%d]: %s\n", board.getName(), board.getId(), board.getDescription()));
 

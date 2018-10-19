@@ -6,7 +6,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import spaceworms.models.Board;
 import spaceworms.models.Message;
-import spaceworms.services.API;
+import spaceworms.services.APIService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public class WebSocketController {
 
     @Autowired
-    API api;
+    APIService api;
 
     @MessageMapping("/getBoards")
     @SendToUser(value = "/endpoint/private")
