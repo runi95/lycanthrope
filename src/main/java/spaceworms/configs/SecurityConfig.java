@@ -25,10 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.
-                authorizeRequests().antMatchers("/post/*").hasRole("default")
-                .and().formLogin().loginPage("/login")
-                .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/").and().exceptionHandling();
+                authorizeRequests().antMatchers("/*").permitAll();
     }
 
     @Override
