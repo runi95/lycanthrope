@@ -5,6 +5,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import spaceworms.models.Board;
+import spaceworms.models.WebSocketRequestMessage;
 import spaceworms.models.WebSocketResponseMessage;
 import spaceworms.services.APIService;
 
@@ -25,6 +26,7 @@ public class WebSocketController {
 
         if (optionalBoards.isPresent()) {
             message.setContent(optionalBoards.get());
+            message.setAction("populateboardtable");
             message.setStatus(200);
         } else {
             message.setContent(null);
@@ -32,5 +34,11 @@ public class WebSocketController {
         }
 
         return message;
+    }
+
+    @MessageMapping("/setNick")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> setNickname(WebSocketRequestMessage webSocketRequestMessage) {
+        return null;
     }
 }

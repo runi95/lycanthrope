@@ -24,7 +24,9 @@
           href="/css/master.css" async/>
 </head>
 <body>
+<div id="nest">
     <#nested/>
+</div>
 </body>
 </html>
 </#macro>

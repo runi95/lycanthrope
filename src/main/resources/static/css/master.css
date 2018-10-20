@@ -2,3 +2,22 @@ body {
     color: aliceblue;
     background: #333333;
 }
+
+#boardtable > div {
+    margin-bottom: 10px;
+}
+
+#boardtable > div > h4 {
+    margin-top: 10px;
+}
+
+#boardtable > div {
+    border: 3px solid #2e2e2e;
+    border-radius: 16px;
+    background: #414141;
+}
+
+#boardtable > div > button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

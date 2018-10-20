@@ -13,7 +13,7 @@
             </div>
             <div class="col-8 offset-2">
                 <div class="login-box">
-                    <form id="loginForm" name="loginForm" action="javascript:void(0);" method="POST">
+                    <form id="loginForm" name="loginForm" action="javascript:setNicknameFromInputField();" method="POST">
 				        <#if _csrf??>
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         </#if>
@@ -38,4 +38,5 @@
     </div>
 </div>
 <link rel="stylesheet" href="/css/index.css" async/>
+<script defer src="/js/index.js"></script>
 </@m.master>

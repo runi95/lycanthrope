@@ -45,7 +45,7 @@ function receiveMessage(message) {
         // TODO: Add a handler when something goes wrong
         // Something went wrong!
     } else {
-        // TODO: Implement actions!
+        handleActions(message);
     }
 }
 
@@ -77,5 +77,5 @@ function getBoards() {
 }
 
 function setNickname(name) {
-    stompClient.send("/websock/setNick", {}, JSON.stringify({"name": name}))
+    stompClient.send("/websock/setNick", {}, JSON.stringify({"action": "nick", "value": name}))
 }
