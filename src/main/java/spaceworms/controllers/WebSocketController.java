@@ -2,13 +2,13 @@ package spaceworms.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
-import spaceworms.models.Board;
-import spaceworms.models.WebSocketRequestMessage;
-import spaceworms.models.WebSocketResponseMessage;
+import spaceworms.models.*;
 import spaceworms.services.APIService;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public class WebSocketController {
 
     @MessageMapping("/getBoards")
     @SendToUser(value = "/endpoint/private")
-    public WebSocketResponseMessage<List<Board>> getBoards() {
+    public WebSocketResponseMessage<List<Board>> getBoards(Principal principal) {
         Optional<List<Board>> optionalBoards = api.getBoards(null);
         WebSocketResponseMessage<List<Board>> message = new WebSocketResponseMessage<>();
 
@@ -36,9 +36,15 @@ public class WebSocketController {
         return message;
     }
 
-    @MessageMapping("/setNick")
+    @MessageMapping("/joinLobby")
+    @SendTo(value = "/endpoint/broadcast")
+    public WebSocketResponseMessage<String> joinLobby() {
+        return null;
+    }
+
+    @MessageMapping("/getLobby")
     @SendToUser(value = "/endpoint/private")
-    public WebSocketResponseMessage<String> setNickname(WebSocketRequestMessage webSocketRequestMessage) {
+    public WebSocketResponseMessage<List<Player>> getLobby() {
         return null;
     }
 }

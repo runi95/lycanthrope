@@ -21,3 +21,7 @@ body {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+#lobbytable {
+    background: #202020;
+}

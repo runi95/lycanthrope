@@ -1,4 +1,4 @@
-<#macro master>
+<#macro websockmaster>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,13 +14,20 @@
 
     <script defer src="/webjars/jquery/2.1.4/jquery.min.js"></script>
     <script defer src="/webjars/bootstrap/4.1.0/js/bootstrap.min.js"></script>
-    <script defer src="/js/master.js"></script>
+    <script defer src="/js/webSocketMaster.js"></script>
+    <script defer src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script defer src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script defer src="/js/stomp.js"></script>
     <link rel="stylesheet"
           href="/webjars/bootstrap/4.1.0/css/bootstrap.min.css" async/>
     <link rel="stylesheet"
           href="/css/master.css" async/>
 </head>
 <body>
+<div style="position: fixed; left: 10px; top: 10px;">
+    Connection: <span id="connected" class="text-success text-hide">connected</span><span id="disconnected" class="text-danger">disconnected</span><span id="connecting" class="text-warning text-hide">connecting...</span>
+</div>
+<div id="nest">
     <#nested/>
 </div>
 </body>

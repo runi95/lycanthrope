@@ -6,13 +6,12 @@
                     <h1>
                         You are now in ${board.name}
                     </h1>
-                    <div id="lobbytable" class="d-flex flex-column">
-
-                    </div>
+                    <ul id="lobbytable" class="list-group"></ul>
                 <#else>
                     <div class="text-danger">
-                        Something went wrong!
+                        Something went wrong, please try rejoining!
                     </div>
+                    <button class="btn btn-primary" onclick="loadBoards()">Back</button>
                 </#if>
             </div>
         </div>

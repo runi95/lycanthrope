@@ -18,7 +18,7 @@ public class User {
     private Player player;
 
     // Just in case we want to add roles at some point.
-    private String role;
+    private String role = "default";
 
     public long getId() {
         return id;

@@ -60,6 +60,9 @@ function connect() {
         stompClient.subscribe('/user/endpoint/private', function (message) {
             receiveMessage(JSON.parse(message.body));
         });
+        stompClient.subscribe('/endpoint/broadcast', function (message) {
+            receiveMessage(JSON.parse(message.body));
+        });
         getBoards();
     });
 }
@@ -76,6 +79,6 @@ function getBoards() {
     stompClient.send("/websock/getBoards", {}, null);
 }
 
-function setNickname(name) {
-    stompClient.send("/websock/setNick", {}, JSON.stringify({"action": "nick", "value": name}))
+function joinLobby(lobbyId) {
+    stompClient.send("/websock/joinLobby/" + lobbyId, {}, null);
 }
