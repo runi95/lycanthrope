@@ -14,4 +14,13 @@ public class UserService {
     public User findByNickname(String nickname) {
         return userRepository.findByNickname(nickname);
     }
+
+    public boolean saveUser(User user) {
+        if (findByNickname(user.getNickname()) != null) {
+            return false;
+        }
+
+        userRepository.save(user);
+        return true;
+    }
 }
