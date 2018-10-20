@@ -1,5 +1,8 @@
 package spaceworms.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Square {
     private int number;
     private int posX;

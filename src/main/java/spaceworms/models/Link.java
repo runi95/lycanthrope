@@ -1,5 +1,8 @@
 package spaceworms.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Link {
     private String direction;
     private int square;
