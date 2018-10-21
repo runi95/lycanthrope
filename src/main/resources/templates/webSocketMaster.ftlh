@@ -11,6 +11,9 @@
         <meta name="csrf_name" content="<#if _csrf.parameterName??>${_csrf.parameterName}</#if>">
         <meta name="csrf_value" content="<#if _csrf.token??>${_csrf.token}</#if>">
     </#if>
+    <#if nickname??>
+        <meta name="nickname" content="${nickname}">
+    </#if>
 
     <script defer src="/webjars/jquery/2.1.4/jquery.min.js"></script>
     <script defer src="/webjars/bootstrap/4.1.0/js/bootstrap.min.js"></script>

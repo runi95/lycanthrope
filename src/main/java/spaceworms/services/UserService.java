@@ -5,18 +5,20 @@ import org.springframework.stereotype.Service;
 import spaceworms.models.User;
 import spaceworms.repositories.UserRepository;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
     @Autowired
     UserRepository userRepository;
 
-    public User findByNickname(String nickname) {
+    public Optional<User> findByNickname(String nickname) {
         return userRepository.findByNickname(nickname);
     }
 
     public boolean saveUser(User user) {
-        if (findByNickname(user.getNickname()) != null) {
+        if (findByNickname(user.getNickname()).isPresent()) {
             return false;
         }
 

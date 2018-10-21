@@ -1,5 +1,7 @@
 package spaceworms.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 
 @Entity
@@ -13,9 +15,10 @@ public class User {
     @Column(unique = true)
     private String nickname;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @MapsId
-    private Player player;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonBackReference
+    private Lobby lobby;
 
     // Just in case we want to add roles at some point.
     private String role = "default";
@@ -32,19 +35,19 @@ public class User {
         this.nickname = nickname;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Lobby getLobby() {
+        return lobby;
+    }
+
+    public void setLobby(Lobby lobby) {
+        this.lobby = lobby;
     }
 }

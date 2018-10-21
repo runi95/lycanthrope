@@ -16,6 +16,7 @@ import spaceworms.models.User;
 import spaceworms.services.APIService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -25,7 +26,9 @@ public class BoardController {
     APIService apiService;
 
     @GetMapping("/boards")
-    public String getBoards() {
+    public String getBoards(Principal principal, Model model) {
+        model.addAttribute("nickname", principal.getName());
+
         return "boards";
     }
 

@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import spaceworms.authentication.UserPrincipal;
 import spaceworms.models.User;
 
+import java.util.Optional;
+
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
     @Autowired
@@ -18,7 +20,11 @@ public class AuthUserDetailsService implements UserDetailsService {
         if (username == null || username.isEmpty())
             throw new UsernameNotFoundException(username);
 
-        User user = userService.findByNickname(username);
+        Optional<User> optionalUser = userService.findByNickname(username);
+        if (!optionalUser.isPresent())
+            throw new UsernameNotFoundException(username);
+
+        User user = optionalUser.get();
         user.setRole("default");
 
         return new UserPrincipal(user);

@@ -80,5 +80,5 @@ function getBoards() {
 }
 
 function joinLobby(lobbyId) {
-    stompClient.send("/websock/joinLobby/" + lobbyId, {}, null);
+    stompClient.send("/websock/joinLobby", {}, JSON.stringify({"action": "join", "value": lobbyId}));
 }

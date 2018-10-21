@@ -1,9 +1,12 @@
+var lobbies = {};
+var currentLobbyId;
+
 function changeView(view) {
     $("#nest").html(view);
 }
 
 function handleActions(message) {
-    switch(message.action) {
+    switch (message.action) {
         case "populateboardtable":
             populateBoardTable(message.content);
             break;
@@ -14,7 +17,7 @@ function handleActions(message) {
 }
 
 function populateBoardTable(boards) {
-    for(var i = 0; i < boards.length; i++) {
+    for (var i = 0; i < boards.length; i++) {
         var board = document.createElement("div");
         var name = document.createElement("h4");
         var hr = document.createElement("hr");
@@ -60,18 +63,43 @@ function addPlayer(playerid, nickname, isowner) {
 */
 
 function loadLobby(message) {
+    lobbies[message.id] = lobbies;
 
+    if (message.id === currentLobbyId) {
+        for (var i = 0; i < message.users.length; i++) {
+            var playerElement = document.getElementById(message.users[i].id);
+
+            if (playerElement === null) {
+                var elements = document.getElementsByClassName("list-group-item-empty");
+                var element;
+                if (elements.length > 0) {
+                    element = elements[0];
+                }
+
+                var text = document.createTextNode(message.users[i].nickname);
+                element.replaceChild(text, element.childNodes[0]);
+                element.setAttribute("id", message.users[i].id);
+
+                if ($("meta[name=nickname]").attr("content") === message.users[i].nickname) {
+                    element.setAttribute("class", "list-group-item list-group-item-success");
+                } else {
+                    element.setAttribute("class", "list-group-item list-group-item-default");
+                }
+            }
+        }
+    }
 }
 
 function joinBoard(id) {
     $.ajax({
         url: '/boards/' + id,
         type: "GET",
-        success: function(result) {
+        success: function (result) {
             changeView(result);
+            currentLobbyId = id;
             joinLobby(id);
         },
-        error: function(error) {
+        error: function (error) {
             console.log("Error: " + error);
         }
     });

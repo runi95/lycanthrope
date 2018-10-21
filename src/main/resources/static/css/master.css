@@ -23,5 +23,35 @@ body {
 }
 
 #lobbytable {
-    background: #202020;
+    /* background: #202020; */
+}
+
+#lobbytable > li {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.list-group-item {
+    text-shadow: none;
+}
+
+.list-group-item-default {
+    border: 2px solid #505050;
+    color: #505050;
+}
+
+.list-group-item-success {
+    border: 2px solid #515724;
+}
+
+.list-group-item-empty {
+    color: #454545;
+    background: #313131;
+    border: 2px dashed #101010;
+}
+
+.board-settings {
+    padding: 10px;
+    background: #313131;
+    border-radius: 10px;
 }
