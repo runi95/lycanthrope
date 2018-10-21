@@ -6,6 +6,7 @@ import spaceworms.models.User;
 import spaceworms.repositories.UserRepository;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -13,12 +14,19 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
+    private static final Pattern regexPattern = Pattern.compile("^[\\w\\-']+$");
+
     public Optional<User> findByNickname(String nickname) {
         return userRepository.findByNickname(nickname);
     }
 
     public boolean saveUser(User user) {
         if (findByNickname(user.getNickname()).isPresent()) {
+            return false;
+        }
+
+        // User's nickname didn't match our naming criteria
+        if (user.getNickname().length() > 16 || !regexPattern.matcher(user.getNickname()).matches()) {
             return false;
         }
 

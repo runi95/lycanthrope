@@ -17,11 +17,9 @@
                         <div class="form-group">
                             <label for="nickname">Nickname</label>
                             <input name="nickname" type="text" class="form-control input-opaque" id="nickname"
-                                   aria-describedby="nicknameHelp" placeholder="Enter Nickname"
-                                   required>
-                            <small id="nicknameHelp" class="form-text text-muted">This is the in-game nickname we'll
-                                show other players.
-                            </small>
+                                   aria-describedby="nicknameHelp" placeholder="Enter Nickname*"
+                                   required autofocus maxlength="16" pattern="^[\w\-']+$">
+                            <small id="nicknameHelp" class="form-text text-muted">*A nickname can only contain english alphanumeric characters</small>
                         </div>
                         <div class="d-flex">
                             <div class="margin-left-auto">
