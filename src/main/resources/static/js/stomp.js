@@ -74,10 +74,11 @@ function connect() {
 
 function disconnect() {
     if (stompClient !== null) {
-        stompClient.disconnect();
+        stompClient.disconnect(function () {
+            console.log("Successfully disconnected the web socket.");
+            setConnected(false);
+        });
     }
-    setConnected(false);
-    console.log("Successfully disconnected the web socket.");
 }
 
 function getBoards() {
