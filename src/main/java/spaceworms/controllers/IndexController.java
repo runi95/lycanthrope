@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import spaceworms.models.User;
 import spaceworms.services.UserService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.regex.Pattern;
 
 @Controller
 public class IndexController {
@@ -20,15 +22,23 @@ public class IndexController {
     @Autowired
     UserService userService;
 
+    private static final Pattern regexPattern = Pattern.compile("^[\\w\\-']+$");
+
     @GetMapping(value = "/")
     public String getMainPage() {
         return "index";
     }
 
-    // TODO: Add some sort of feedback if we fail to save the user!
     // TODO: Remove a user from DB if the user's session ends!
     @PostMapping(value = "/setNick")
-    public String setNickname(@RequestParam("nickname") String nickname, HttpServletRequest request) {
+    public String setNickname(@RequestParam("nickname") String nickname, HttpServletRequest request, Model model) {
+        // User's nickname didn't match our naming criteria
+        if (nickname.length() > 16 || !regexPattern.matcher(nickname).matches()) {
+            model.addAttribute("error", "That nickname uses invalid characters!");
+
+            return "index";
+        }
+
         User user = new User();
         user.setNickname(nickname);
 
@@ -42,7 +52,9 @@ public class IndexController {
 
             return "redirect:/boards";
         } else {
-            return "redirect:/";
+            model.addAttribute("error", "That nickname is already taken!");
+
+            return "index";
         }
     }
 }
