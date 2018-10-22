@@ -8,7 +8,6 @@ import java.util.List;
 @Table
 public class Lobby {
 
-    private int lobbySize = 0;
     private boolean started = false;
 
     // Hardcoded to let player 1 start, maybe it should be random instead?
@@ -47,10 +46,12 @@ public class Lobby {
     public void setCurrentPlayerId(int currentPlayerId) { this.currentPlayerId = currentPlayerId; }
 
     public void addUser(User user) {
-        this.lobbySize = this.lobbySize + 1;
         user.setLobby(this);
         this.users.add(user);
     }
 
-    public int getLobbySize() { return this.lobbySize; }
+    public void removeUser(User user) {
+        user.setLobby(null);
+        this.users.remove(user);
+    }
 }

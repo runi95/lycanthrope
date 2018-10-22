@@ -36,7 +36,6 @@ public class LobbyService {
         return lobbyRepository.findById(boardId);
     }
 
-    // TODO: Fix bug where the same player can join the same lobby twice
     public Optional<Lobby> joinLobby(int boardId, User user) {
         Lobby lobby = null;
         Optional<Lobby> optionalLobby = findLobbyById(boardId);
@@ -70,12 +69,16 @@ public class LobbyService {
             createLobbySemaphore.release();
         }
 
+        if (user.getLobby() != null && user.getLobby().getId() == lobby.getId()) {
+            return Optional.of(lobby);
+        }
+
         boolean success = false;
         try {
             joinLobbySemaphore.acquire();
 
-            if (lobby.getLobbySize() < 4) {
-                user.setPlayerNumber(lobby.getLobbySize() + 1);
+            if (lobby.getUsers().size() < 4) {
+                user.setPlayerNumber(lobby.getUsers().size() + 1);
                 userService.save(user);
 
                 lobby.addUser(user);
