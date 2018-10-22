@@ -29,7 +29,6 @@ public class IndexController {
         return "index";
     }
 
-    // TODO: Remove a user from DB if the user's session ends!
     @PostMapping(value = "/setNick")
     public String setNickname(@RequestParam("nickname") String nickname, HttpServletRequest request, Model model) {
         // User's nickname didn't match our naming criteria

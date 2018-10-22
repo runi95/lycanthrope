@@ -29,4 +29,11 @@ public class UserService {
     public void deleteUser(User user) {
         userRepository.delete(user);
     }
+
+    public void deleteUserByNickname(String nickname) {
+        Optional<User> optionalUser = findByNickname(nickname);
+        if (optionalUser.isPresent()) {
+            deleteUser(optionalUser.get());
+        }
+    }
 }
