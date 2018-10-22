@@ -88,7 +88,7 @@ public class WebSocketController {
             throw new Exception("You can't roll the die before the game starts!");
         }
 
-        if (optionalUser.get().getId() != optionalUser.get().getLobby().getCurrentPlayerId()) {
+        if (optionalUser.get().getPlayerNumber() != optionalUser.get().getLobby().getCurrentPlayerId()) {
             throw new Exception("You can't roll the die on someone else's turn!");
         }
 
