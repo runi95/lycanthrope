@@ -124,9 +124,7 @@ public class LobbyService {
         if (userWon) {
             diceThrowResult.setWinningPlayerId(user.getPlayerNumber());
             diceThrowResult.setGameEnded(true);
-        }
 
-        if (userWon) {
             lobbyRepository.delete(lobby);
         } else {
             userService.save(user);
