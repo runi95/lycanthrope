@@ -25,7 +25,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests().antMatchers("/boards").hasRole("default")
+                .authorizeRequests().antMatchers("/").permitAll()
+                .and().authorizeRequests().antMatchers("/boards*", "/game*").hasRole("default")
                 .and().formLogin().loginPage("/");
     }
 
