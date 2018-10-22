@@ -4,7 +4,7 @@
 
 1. Run `git clone https://github.com/runi95/Sp4ceW0rms` to clone the repository.
 2. Run `cd Sp4ceW0rms` to get into the newly cloned folder.
-3. Create a new file called `application.properties` inside the `Sp4ceW0rms` folder and follow the instructions for how to set up your properties file.
+3. Create a new file called `application.properties` at this location `Sp4ceW0rms/src/main/resources/application.properties` and follow the instructions for how to set up your properties file.
 4. Run `mvn install` to compile and install the project.
 
 ## How to set up application.properties
