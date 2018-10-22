@@ -80,7 +80,7 @@ public class LobbyService {
 
                 lobby.addUser(user);
 
-                if (lobby.getUsers().size() == 1) {
+                if (lobby.getUsers().size() == 2) {
                     lobby.setStarted(true);
                     int startPosition = lobby.getBoard().getStart();
                     lobby.getUsers().forEach(u -> { u.setSquareNumber(startPosition); userService.save(u); });
@@ -106,9 +106,9 @@ public class LobbyService {
     public DiceThrowResult rollDice(User user) {
         Lobby lobby = user.getLobby();
         int dieResult = getRandomDieThrow();
-        int landingSquareNumber = user.getSquareNumber() + dieResult;
+        int landingSquareNumber = Math.min(user.getSquareNumber() + dieResult, lobby.getBoard().getDimX() * lobby.getBoard().getDimY());
 
-        Square landingSquare = lobby.getBoard().getSquares().get(Math.min(landingSquareNumber, lobby.getBoard().getDimX() * lobby.getBoard().getDimY()) - 1);
+        Square landingSquare = lobby.getBoard().getSquares().get(landingSquareNumber - 1);
         if (landingSquare.isWormhole()) {
             landingSquareNumber = landingSquare.getWormhole();
         }
