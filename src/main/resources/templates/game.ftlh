@@ -17,7 +17,7 @@
                                             <div id="p${square.number}" class="d-flex flex-wrap">
                                                 <#list lobby.users as user>
                                                     <#if user.squareNumber == square.number>
-                                                        <div id="u${user.id}"
+                                                        <div id="u${user.playerNumber}"
                                                              class="player player-${user.playerNumber}"></div>
                                                     </#if>
                                                 </#list>
