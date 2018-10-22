@@ -110,7 +110,7 @@ public class LobbyService {
 
         Square landingSquare = lobby.getBoard().getSquares().get(Math.min(landingSquareNumber, lobby.getBoard().getDimX() * lobby.getBoard().getDimY() - 1));
         if (landingSquare.isWormhole()) {
-            user.setSquareNumber(landingSquare.getWormhole());
+            user.setSquareNumber(landingSquare.getWormhole() - 1);
         } else {
             user.setSquareNumber(landingSquareNumber);
         }
