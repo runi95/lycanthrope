@@ -108,12 +108,12 @@ public class LobbyService {
         int dieResult = getRandomDieThrow();
         int landingSquareNumber = user.getSquareNumber() + dieResult;
 
-        Square landingSquare = lobby.getBoard().getSquares().get(Math.min(landingSquareNumber, lobby.getBoard().getDimX() * lobby.getBoard().getDimY() - 1));
+        Square landingSquare = lobby.getBoard().getSquares().get(Math.min(landingSquareNumber, lobby.getBoard().getDimX() * lobby.getBoard().getDimY()) - 1);
         if (landingSquare.isWormhole()) {
-            user.setSquareNumber(landingSquare.getWormhole() - 1);
-        } else {
-            user.setSquareNumber(landingSquareNumber);
+            landingSquareNumber = landingSquare.getWormhole();
         }
+
+        user.setSquareNumber(landingSquareNumber);
 
         DiceThrowResult diceThrowResult = new DiceThrowResult();
         diceThrowResult.setDiceThrowLandingSquare(landingSquareNumber);
