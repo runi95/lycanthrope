@@ -64,7 +64,11 @@ function connect() {
         stompClient.subscribe('/endpoint/broadcast', function (message) {
             receiveMessage(JSON.parse(message.body));
         });
+
+        stompClient.event
         getBoards();
+    }, function () {
+        setConnected(false);
     });
 }
 
