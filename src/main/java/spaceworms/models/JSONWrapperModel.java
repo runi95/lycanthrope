@@ -2,6 +2,8 @@ package spaceworms.models;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +12,8 @@ import java.util.Optional;
 
 public class JSONWrapperModel<E> {
 
-    // TODO: Figure out why Jackson didn't like it when I created the typeReference inside this method
+    Logger logger = LoggerFactory.getLogger(JSONWrapperModel.class);
+
     public Optional<E> readJSONValueFromStreamAndHandleErrors(InputStream inputStream, TypeReference<E> typeReference, int responseCode) {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             return this.readJSONValueFromStream(inputStream, typeReference);
@@ -20,7 +23,7 @@ public class JSONWrapperModel<E> {
 
             // For now we simply print errors we get from the API
             if (optionalError.isPresent()) {
-                printError(optionalError.get());
+                logError(optionalError.get());
             }
 
             return Optional.empty();
@@ -43,8 +46,7 @@ public class JSONWrapperModel<E> {
         return Optional.of(parsedJSONValue);
     }
 
-    // TODO: Change this method from print to log
-    private static void printError(Error error) {
-        System.err.printf("%s\t Error(%d): %s\n", error.getLevel(), error.getCode(), error.getMessage());
+    private void logError(Error error) {
+        logger.error(error.getMessage());
     }
 }
