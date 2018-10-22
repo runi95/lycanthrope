@@ -37,8 +37,7 @@ public class WebSocketController {
             message.setAction("populateboardtable");
             message.setStatus(200);
         } else {
-            message.setContent(null);
-            message.setStatus(500);
+            return errorResponse();
         }
 
         return message;
@@ -56,29 +55,17 @@ public class WebSocketController {
         }
 
         if (boardId == null) {
-            WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-            webSocketResponseMessage.setContent(null);
-            webSocketResponseMessage.setStatus(500);
-
-            return webSocketResponseMessage;
+            return errorResponse();
         }
 
         Optional<User> optionalUser = userService.findByNickname(principal.getName());
         if (!optionalUser.isPresent()) {
-            WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-            webSocketResponseMessage.setContent(null);
-            webSocketResponseMessage.setStatus(500);
-
-            return webSocketResponseMessage;
+            return errorResponse();
         }
 
         Optional<Lobby> optionalLobby = lobbyService.joinLobby(boardId, optionalUser.get());
         if (!optionalLobby.isPresent()) {
-            WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-            webSocketResponseMessage.setContent(null);
-            webSocketResponseMessage.setStatus(500);
-
-            return webSocketResponseMessage;
+            return errorResponse();
         }
 
         WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
@@ -89,9 +76,37 @@ public class WebSocketController {
         return webSocketResponseMessage;
     }
 
-    @MessageMapping("/getLobby")
-    @SendToUser(value = "/endpoint/private")
-    public WebSocketResponseMessage<List<User>> getLobby() {
-        return null;
+    @MessageMapping("/rollDice")
+    @SendTo(value = "/endpoint/broadcast")
+    public WebSocketResponseMessage<String> rollDice(Principal principal) throws Exception {
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("No player with the given nickname could be found!");
+        }
+
+        if (!optionalUser.get().getLobby().isStarted()) {
+            throw new Exception("You can't roll the die before the game starts!");
+        }
+
+        if (optionalUser.get().getId() != optionalUser.get().getLobby().getCurrentPlayerId()) {
+            throw new Exception("You can't roll the die on someone else's turn!");
+        }
+
+        DiceThrowResult diceThrowResult = lobbyService.rollDice(optionalUser.get());
+
+        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        webSocketResponseMessage.setAction("diceresult");
+        webSocketResponseMessage.setContent(diceThrowResult);
+        webSocketResponseMessage.setStatus(200);
+
+        return webSocketResponseMessage;
+    }
+
+    private WebSocketResponseMessage errorResponse() {
+        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        webSocketResponseMessage.setContent(null);
+        webSocketResponseMessage.setStatus(500);
+
+        return webSocketResponseMessage;
     }
 }

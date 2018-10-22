@@ -10,12 +10,13 @@ import java.util.Optional;
 
 public class JSONWrapperModel<E> {
 
-    public Optional<E> readJSONValueFromStreamAndHandleErrors(InputStream inputStream, int responseCode) {
+    // TODO: Figure out why Jackson didn't like it when I created the typeReference inside this method
+    public Optional<E> readJSONValueFromStreamAndHandleErrors(InputStream inputStream, TypeReference<E> typeReference, int responseCode) {
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            return this.readJSONValueFromStream(inputStream);
+            return this.readJSONValueFromStream(inputStream, typeReference);
         } else {
             JSONWrapperModel<Error> jsonWrapperModel = new JSONWrapperModel<>();
-            Optional<Error> optionalError = jsonWrapperModel.readJSONValueFromStream(inputStream);
+            Optional<Error> optionalError = jsonWrapperModel.readJSONValueFromStream(inputStream, new TypeReference<Error>() {});
 
             // For now we simply print errors we get from the API
             if (optionalError.isPresent()) {
@@ -26,9 +27,8 @@ public class JSONWrapperModel<E> {
         }
     }
 
-    public Optional<E> readJSONValueFromStream(InputStream inputStream) {
+    public Optional<E> readJSONValueFromStream(InputStream inputStream, TypeReference<E> typeReference) {
         ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<E> typeReference = new TypeReference<E>() {};
 
         E parsedJSONValue;
         try {

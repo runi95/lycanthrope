@@ -1,5 +1,6 @@
 package spaceworms.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class APIService {
@@ -26,11 +26,12 @@ public class APIService {
     public Optional<List<Board>> getBoards(String filter) {
         Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards" + (filter != null && filter.length() > 0 ? "?" + filter : ""));
         if (response == null) {
-            return null;
+            return Optional.empty();
         }
 
+        TypeReference<List<Board>> typeReference = new TypeReference<List<Board>>() {};
         JSONWrapperModel<List<Board>> jsonWrapperModel = new JSONWrapperModel<>();
-        Optional<List<Board>> optionalBoards = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
+        Optional<List<Board>> optionalBoards = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), typeReference, response.getValue());
 
         try {
             response.getKey().close();
@@ -44,11 +45,12 @@ public class APIService {
     public Optional<Board> getBoard(int boardId) {
         Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards/" + boardId);
         if (response == null) {
-            return null;
+            return Optional.empty();
         }
 
+        TypeReference<Board> typeReference = new TypeReference<Board>() {};
         JSONWrapperModel<Board> jsonWrapperModel = new JSONWrapperModel<>();
-        Optional<Board> optionalBoard = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
+        Optional<Board> optionalBoard = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), typeReference, response.getValue());
 
         try {
             response.getKey().close();
@@ -62,11 +64,12 @@ public class APIService {
     public Optional<Square> getSquare(int boardId, int squareNumber) {
         Pair<InputStream, Integer> response = getInputStreamForAPIEndpoint(API_URL + "/boards/" + boardId + "/" + squareNumber);
         if (response == null) {
-            return null;
+            return Optional.empty();
         }
 
+        TypeReference<Square> typeReference = new TypeReference<Square>() {};
         JSONWrapperModel<Square> jsonWrapperModel = new JSONWrapperModel<>();
-        Optional<Square> optionalSquare = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), response.getValue());
+        Optional<Square> optionalSquare = jsonWrapperModel.readJSONValueFromStreamAndHandleErrors(response.getKey(), typeReference, response.getValue());
 
         try {
             response.getKey().close();
@@ -75,6 +78,34 @@ public class APIService {
         }
 
         return optionalSquare;
+    }
+
+    public Optional<Board> loadBoardAndSquares(int boardId) {
+        Optional<Board> optionalBoard = getBoard(boardId);
+        if (!optionalBoard.isPresent()) {
+            return optionalBoard;
+        }
+
+        List<Square> squares = new ArrayList<>();
+
+        for (int i = 0; i < optionalBoard.get().getDimY(); i++) {
+            for(int j = 1; j <= optionalBoard.get().getDimX(); j++) {
+                Optional<Square> optionalSquare = getSquare(optionalBoard.get().getId(), i * optionalBoard.get().getDimX() + j);
+
+                if (optionalSquare.isPresent()) {
+                    if (optionalSquare.get().getWormhole() > 0) {
+                        optionalSquare.get().setIsWormhole(true);
+                    }
+
+                    optionalSquare.get().setBoard(optionalBoard.get());
+                    squares.add(optionalSquare.get());
+                }
+            }
+        }
+
+        optionalBoard.get().setSquares(squares);
+
+        return optionalBoard;
     }
 
     private static Pair<InputStream, Integer> getInputStreamForAPIEndpoint(String apiEndpointURL) {
@@ -102,6 +133,8 @@ public class APIService {
             httpURLConnection.setRequestMethod("GET");
         } catch (ProtocolException e) {
             e.printStackTrace();
+
+            return null;
         }
 
         int responseCode = 0;
@@ -109,13 +142,17 @@ public class APIService {
             responseCode = httpURLConnection.getResponseCode();
         } catch (IOException e) {
             e.printStackTrace();
+
+            return null;
         }
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = httpURLConnection.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
+
+            return null;
         }
 
         return new Pair<>(inputStream, responseCode);

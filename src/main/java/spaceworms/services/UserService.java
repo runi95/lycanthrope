@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     private static final Pattern regexPattern = Pattern.compile("^[\\w\\-']+$");
 
@@ -20,7 +20,7 @@ public class UserService {
         return userRepository.findByNickname(nickname);
     }
 
-    public boolean saveUser(User user) {
+    public boolean save(User user) {
         if (findByNickname(user.getNickname()).isPresent()) {
             return false;
         }
@@ -32,5 +32,9 @@ public class UserService {
 
         userRepository.save(user);
         return true;
+    }
+
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 }

@@ -55,3 +55,70 @@ body {
     background: #313131;
     border-radius: 10px;
 }
+
+.square {
+    width: 96px;
+    height: 96px;
+    background: #505050;
+    margin: 8px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.wormhole {
+    background: black !important;
+    border-radius: 50%;
+}
+
+.square-content {
+    margin-top: 33px;
+}
+
+.style-none {
+    list-style: none;
+}
+
+.player-container {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+}
+
+.player {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.player-1 {
+    background: red;
+}
+
+.player-2 {
+    background: green;
+}
+
+.player-3 {
+    background: blue;
+}
+
+.player-4 {
+    background: yellow;
+}
+
+.player-text-1 {
+    color: red;
+}
+
+.player-text-2 {
+    color: green;
+}
+
+.player-text-3 {
+    color: blue;
+}
+
+.player-text-4 {
+    color: yellow;
+}

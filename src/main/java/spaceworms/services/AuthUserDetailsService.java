@@ -13,7 +13,7 @@ import java.util.Optional;
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -1,11 +1,19 @@
+
 package spaceworms.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import javax.persistence.*;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
+@Table
 public class Board {
 
-    private int id;
     private String name;
     private String description;
     private String size;
@@ -14,67 +22,45 @@ public class Board {
     private int start;
     private int goal;
 
-    public int getId() {
-        return id;
-    }
+    @Id
+    private int id;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    @JsonBackReference
+    @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Lobby lobby;
 
-    public String getName() {
-        return name;
-    }
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OrderBy("number ASC")
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<Square> squares;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getSize() {
-        return size;
-    }
+    public String getSize() { return size; }
+    public void setSize(String size) { this.size = size; }
 
-    public void setSize(String size) {
-        this.size = size;
-    }
+    public int getDimX() { return dimX; }
+    public void setDimX(int dimX) { this.dimX = dimX; }
 
-    public int getDimX() {
-        return dimX;
-    }
+    public int getDimY() { return dimY; }
+    public void setDimY(int dimY) { this.dimY = dimY; }
 
-    public void setDimX(int dimX) {
-        this.dimX = dimX;
-    }
+    public int getStart() { return start; }
+    public void setStart(int start) { this.start = start; }
 
-    public int getDimY() {
-        return dimY;
-    }
+    public int getGoal() { return goal; }
+    public void setGoal(int goal) { this.goal = goal; }
 
-    public void setDimY(int dimY) {
-        this.dimY = dimY;
-    }
+    public Lobby getLobby() { return lobby; }
+    public void setLobby(Lobby lobby) { this.lobby = lobby; }
 
-    public int getStart() {
-        return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
-    }
-
-    public int getGoal() {
-        return goal;
-    }
-
-    public void setGoal(int goal) {
-        this.goal = goal;
-    }
+    public List<Square> getSquares() { return squares; }
+    public void setSquares(List<Square> squares) { this.squares = squares; }
 }

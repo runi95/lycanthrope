@@ -32,7 +32,7 @@ public class IndexController {
         User user = new User();
         user.setNickname(nickname);
 
-        boolean isUserSaved = userService.saveUser(user);
+        boolean isUserSaved = userService.save(user);
         if (isUserSaved) {
             UserPrincipal userPrincipal = new UserPrincipal(user);
 
