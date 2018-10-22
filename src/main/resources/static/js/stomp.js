@@ -42,8 +42,9 @@ function setConnecting() {
 
 function receiveMessage(message) {
     if (message.status != 200) {
-        // TODO: Add a handler when something goes wrong
+
         // Something went wrong!
+        console.error(message.content);
     } else {
         handleActions(message);
     }
