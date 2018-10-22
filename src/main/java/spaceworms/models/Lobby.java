@@ -10,6 +10,8 @@ public class Lobby {
 
     private int lobbySize = 0;
     private boolean started = false;
+
+    // Hardcoded to let player 1 start, maybe it should be random instead?
     private int currentPlayerId = 1;
 
     @Id
