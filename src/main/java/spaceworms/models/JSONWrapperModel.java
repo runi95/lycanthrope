@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class JSONWrapperModel<E> {
 
-    Logger logger = LoggerFactory.getLogger(JSONWrapperModel.class);
+    private Logger logger = LoggerFactory.getLogger(JSONWrapperModel.class);
 
     public Optional<E> readJSONValueFromStreamAndHandleErrors(InputStream inputStream, TypeReference<E> typeReference, int responseCode) {
         if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -21,7 +21,6 @@ public class JSONWrapperModel<E> {
             JSONWrapperModel<Error> jsonWrapperModel = new JSONWrapperModel<>();
             Optional<Error> optionalError = jsonWrapperModel.readJSONValueFromStream(inputStream, new TypeReference<Error>() {});
 
-            // For now we simply print errors we get from the API
             if (optionalError.isPresent()) {
                 logError(optionalError.get());
             }
@@ -37,7 +36,8 @@ public class JSONWrapperModel<E> {
         try {
             parsedJSONValue = objectMapper.readValue(inputStream, typeReference);
         } catch (IOException e) {
-            System.err.println("Could not parse JSON object, please see the stacktrace below for more information.");
+            logger.error("Could not parse JSON object, please see the stacktrace below for more information.");
+
             e.printStackTrace();
 
             return Optional.empty();

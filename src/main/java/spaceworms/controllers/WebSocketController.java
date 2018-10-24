@@ -1,5 +1,7 @@
 package spaceworms.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -26,6 +28,8 @@ public class WebSocketController {
     @Autowired
     UserService userService;
 
+    private Logger logger = LoggerFactory.getLogger(WebSocketController.class);
+
     @MessageMapping("/getBoards")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<List<Board>> getBoards() {
@@ -37,7 +41,7 @@ public class WebSocketController {
             message.setAction("populateboardtable");
             message.setStatus(200);
         } else {
-            return errorResponse();
+            return errorResponse("failed to retrieve boards from the api");
         }
 
         return message;
@@ -55,17 +59,17 @@ public class WebSocketController {
         }
 
         if (boardId == null) {
-            return errorResponse();
+            return errorResponse("boardId can't be null");
         }
 
         Optional<User> optionalUser = userService.findByNickname(principal.getName());
         if (!optionalUser.isPresent()) {
-            return errorResponse();
+            return errorResponse("could not find the user this message came from");
         }
 
         Optional<Lobby> optionalLobby = lobbyService.joinLobby(boardId, optionalUser.get());
         if (!optionalLobby.isPresent()) {
-            return errorResponse();
+            return errorResponse("failed to join the lobby");
         }
 
         WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
@@ -102,9 +106,11 @@ public class WebSocketController {
         return webSocketResponseMessage;
     }
 
-    private WebSocketResponseMessage errorResponse() {
+    private WebSocketResponseMessage errorResponse(String message) {
+        logger.warn(message);
+
         WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-        webSocketResponseMessage.setContent(null);
+        webSocketResponseMessage.setContent(message);
         webSocketResponseMessage.setStatus(500);
 
         return webSocketResponseMessage;

@@ -1,5 +1,7 @@
 package spaceworms.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,8 @@ public class IndexController {
 
     @Autowired
     UserService userService;
+
+    private Logger logger = LoggerFactory.getLogger(IndexController.class);
 
     private static final Pattern regexPattern = Pattern.compile("^[\\w\\-']+$");
 
