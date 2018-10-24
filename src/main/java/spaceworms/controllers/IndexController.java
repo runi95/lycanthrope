@@ -55,6 +55,9 @@ public class IndexController {
 
             return "redirect:/boards";
         } else {
+
+            // If this log entry is spammed too much then we might want to consider removing it!
+            logger.info("A user picked a nickname that was already taken");
             model.addAttribute("error", "That nickname is already taken!");
 
             return "index";
