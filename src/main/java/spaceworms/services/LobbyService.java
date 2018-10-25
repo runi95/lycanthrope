@@ -106,6 +106,10 @@ public class LobbyService {
         }
     }
 
+    public void delete(Lobby lobby) {
+        lobbyRepository.delete(lobby);
+    }
+
     public DiceThrowResult rollDice(User user) {
         Lobby lobby = user.getLobby();
         int dieResult = getRandomDieThrow();
