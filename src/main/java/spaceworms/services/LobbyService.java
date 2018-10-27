@@ -83,7 +83,7 @@ public class LobbyService {
 
                 lobby.addUser(user);
 
-                if (lobby.getUsers().size() == 2) {
+                if (lobby.getUsers().size() == 4) {
                     lobby.setStarted(true);
                     int startPosition = lobby.getBoard().getStart();
                     lobby.getUsers().forEach(u -> { u.setSquareNumber(startPosition); userService.save(u); });
@@ -144,6 +144,10 @@ public class LobbyService {
         }
 
         return diceThrowResult;
+    }
+
+    public void save(Lobby lobby) {
+        lobbyRepository.save(lobby);
     }
 
     public int getRandomDieThrow() {
