@@ -43,4 +43,16 @@ public class User {
 
     public int getPlayerNumber() { return playerNumber; }
     public void setPlayerNumber(int playerNumber) { this.playerNumber = playerNumber; }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", nickname='" + nickname + '\'' +
+                ", lobby=" + lobby +
+                ", playerNumber=" + playerNumber +
+                ", squareNumber=" + squareNumber +
+                ", role='" + role + '\'' +
+                '}';
+    }
 }

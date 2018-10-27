@@ -26,7 +26,7 @@ public class Board {
     private int id;
 
     @JsonBackReference
-    @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Lobby lobby;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

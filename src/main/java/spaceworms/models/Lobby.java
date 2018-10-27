@@ -16,11 +16,11 @@ public class Lobby {
     @Id
     private int id;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "lobby", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "lobby", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @OrderBy("playerNumber ASC")
     private List<User> users = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     @MapsId
     private Board board;
 
@@ -53,5 +53,12 @@ public class Lobby {
     public void removeUser(User user) {
         user.setLobby(null);
         this.users.remove(user);
+    }
+
+    @PreRemove
+    private void preRemove() {
+        for (User u : users) {
+            u.setLobby(null);
+        }
     }
 }
