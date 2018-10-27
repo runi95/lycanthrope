@@ -17,6 +17,19 @@ function handleActions(message) {
         case "diceresult":
             diceResult(message.content);
             break;
+        case "disconnected":
+            disconnectPlayer(message.content);
+            break;
+    }
+}
+
+function disconnectPlayer(leavingPlayer) {
+    var playerElement = document.getElementById(leavingPlayer.id);
+    if (playerElement != null) {
+        var text = document.createTextNode("Open Slot");
+        playerElement.replaceChild(text, playerElement.childNodes[0]);
+        playerElement.setAttribute("id", "");
+        playerElement.setAttribute("class", "list-group-item list-group-item-empty");
     }
 }
 
@@ -92,6 +105,8 @@ function loadLobby(message) {
                     var element;
                     if (elements.length > 0) {
                         element = elements[0];
+                    } else {
+                        element = elements;
                     }
 
                     var text = document.createTextNode(message.users[i].nickname);

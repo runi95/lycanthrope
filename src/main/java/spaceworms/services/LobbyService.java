@@ -79,11 +79,13 @@ public class LobbyService {
 
             if (lobby.getUsers().size() < 4) {
                 user.setPlayerNumber(lobby.getUsers().size() + 1);
+
+                // TODO: Get rid of some of the saves here, we don't need this many!
                 userService.save(user);
 
                 lobby.addUser(user);
 
-                if (lobby.getUsers().size() == 4) {
+                if (lobby.getUsers().size() == 2) {
                     lobby.setStarted(true);
                     int startPosition = lobby.getBoard().getStart();
                     lobby.getUsers().forEach(u -> { u.setSquareNumber(startPosition); userService.save(u); });

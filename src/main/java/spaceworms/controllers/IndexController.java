@@ -45,7 +45,7 @@ public class IndexController {
         User user = new User();
         user.setNickname(nickname);
 
-        boolean isUserSaved = userService.save(user);
+        boolean isUserSaved = userService.saveIfNicknameNotTaken(user);
         if (isUserSaved) {
             UserPrincipal userPrincipal = new UserPrincipal(user);
 
