@@ -17,13 +17,17 @@ public class UserService {
         return userRepository.findByNickname(nickname);
     }
 
-    public boolean save(User user) {
+    public boolean saveIfNicknameNotTaken(User user) {
         if (findByNickname(user.getNickname()).isPresent()) {
             return false;
         }
 
-        userRepository.save(user);
+        save(user);
         return true;
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 
     public Iterable<User> findAll() {
