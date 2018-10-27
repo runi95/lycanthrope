@@ -40,4 +40,8 @@ public class UserService {
             deleteUser(optionalUser.get());
         }
     }
+
+    public Optional<User> findById(long id) {
+        return userRepository.findById(id);
+    }
 }
