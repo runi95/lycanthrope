@@ -26,6 +26,10 @@ public class UserService {
         return true;
     }
 
+    public Iterable<User> findAll() {
+        return userRepository.findAll();
+    }
+
     public void deleteUser(User user) {
         userRepository.delete(user);
     }
