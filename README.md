@@ -1,10 +1,10 @@
-# Space Worms
+# Lycanthrope
 
-## How to install Space Worms
+## How to install Lycanthrope
 
-1. Run `git clone https://github.com/runi95/Sp4ceW0rms` to clone the repository.
-2. Run `cd Sp4ceW0rms` to get into the newly cloned folder.
-3. Create a new file called `application.properties` at this location `Sp4ceW0rms/src/main/resources/application.properties` and follow the instructions for how to set up your properties file.
+1. Run `git clone https://github.com/runi95/lycanthrope` to clone the repository.
+2. Run `cd lycanthrope` to get into the newly cloned folder.
+3. Create a new file called `application.properties` at this location `lycanthrope/src/main/resources/application.properties` and follow the instructions for how to set up your properties file.
 4. Run `mvn install` to compile and install the project.
 
 ## How to set up application.properties
@@ -15,7 +15,7 @@ server.port = 8080
 buildNumber = @buildNumber@
 
 spring.datasource.driverClassName = org.h2.Driver
-spring.datasource.url = jdbc:h2:file:./SpaceWormsDB;FILE_LOCK=FS
+spring.datasource.url = jdbc:h2:file:./lycanthropeDB;FILE_LOCK=FS
 spring.jpa.hibernate.ddl-auto = update
 spring.jpa.hibernate.show-sql = true
 spring.jpa.database-platform = org.hibernate.dialect.H2Dialect
@@ -33,7 +33,7 @@ Simply replace <your-api-url> with the actual API URL.
 
 ## How to start Space Worms
 
-1. Run `java -jar target/SpaceWorms-1.0-SNAPSHOT.jar` to start the application.
+1. Run `java -jar target/Lycanthrope-1.0-SNAPSHOT.jar` to start the application.
 2. Open a web browser and check out `localhost:8080`.
 3. Enjoy!
 

@@ -1,5 +1,5 @@
 .idea
-SpaceWorms.iml
+Lycanthrope.iml
 target
 src/main/resources/application.properties
-SpaceWormsDB.mv.db
+LycanthropeDB.mv.db

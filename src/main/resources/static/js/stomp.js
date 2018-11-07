@@ -53,7 +53,7 @@ function receiveMessage(message) {
 function connect() {
     setConnecting();
 
-    var socket = new SockJS('/spaceworms');
+    var socket = new SockJS('/lycanthrope');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
