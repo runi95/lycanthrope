@@ -12,7 +12,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import lycanthrope.models.DiceThrowResult;
 import lycanthrope.models.Lobby;
 import lycanthrope.models.User;
 import lycanthrope.models.WebSocketResponseMessage;
@@ -76,21 +75,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             webSocketResponseMessage.setAction("disconnected");
             webSocketResponseMessage.setContent(optionalUser.get());
             simpMessagingTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-        } else {
-            DiceThrowResult diceThrowResult = new DiceThrowResult();
-            diceThrowResult.setGameEnded(true);
-
-            if (optionalUser.get().getLobby().getUsers().size() > 0) {
-                diceThrowResult.setWinningPlayerId(optionalUser.get().getLobby().getUsers().get(0).getPlayerNumber());
-            }
-
-            WebSocketResponseMessage<DiceThrowResult> webSocketResponseMessage = new WebSocketResponseMessage<>();
-            webSocketResponseMessage.setStatus(200);
-            webSocketResponseMessage.setAction("diceresult");
-            webSocketResponseMessage.setContent(diceThrowResult);
-            simpMessagingTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-
-            lobbyService.delete(optionalUser.get().getLobby());
         }
     }
 }

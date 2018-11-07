@@ -20,10 +20,6 @@ public class Lobby {
     @OrderBy("playerNumber ASC")
     private List<User> users = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @MapsId
-    private Board board;
-
     public int getId() {
         return id;
     }
@@ -38,9 +34,6 @@ public class Lobby {
 
     public boolean isStarted() { return started; }
     public void setStarted(boolean started) { this.started = started; }
-
-    public Board getBoard() { return board; }
-    public void setBoard(Board board) { this.board = board; }
 
     public int getCurrentPlayerId() { return currentPlayerId; }
     public void setCurrentPlayerId(int currentPlayerId) { this.currentPlayerId = currentPlayerId; }

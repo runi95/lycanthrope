@@ -19,16 +19,7 @@ public class LobbyService {
     private LobbyRepository lobbyRepository;
 
     @Autowired
-    private BoardService boardService;
-
-    @Autowired
-    private SquareService squareService;
-
-    @Autowired
     private UserService userService;
-
-    @Autowired
-    private APIService apiService;
 
     private Random random = new Random();
 
@@ -51,16 +42,8 @@ public class LobbyService {
                 if (optionalLobby.isPresent()) {
                     lobby = optionalLobby.get();
                 } else {
-                    Optional<Board> optionalBoard = apiService.loadBoardAndSquares(boardId);
-                    if (!optionalBoard.isPresent()) {
-                        return Optional.empty();
-                    }
-
-                    boardService.save(optionalBoard.get());
-
                     lobby = new Lobby();
                     lobby.setId(boardId);
-                    lobby.setBoard(optionalBoard.get());
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -87,8 +70,6 @@ public class LobbyService {
 
                 if (lobby.getUsers().size() == 2) {
                     lobby.setStarted(true);
-                    int startPosition = lobby.getBoard().getStart();
-                    lobby.getUsers().forEach(u -> { u.setSquareNumber(startPosition); userService.save(u); });
                 }
 
                 lobbyRepository.save(lobby);
@@ -112,47 +93,12 @@ public class LobbyService {
         lobbyRepository.delete(lobby);
     }
 
-    public DiceThrowResult rollDice(User user) {
-        Lobby lobby = user.getLobby();
-        int dieResult = getRandomDieThrow();
-        int landingSquareNumber = Math.min(user.getSquareNumber() + dieResult, lobby.getBoard().getDimX() * lobby.getBoard().getDimY());
-
-        Square landingSquare = lobby.getBoard().getSquares().get(landingSquareNumber - 1);
-        if (landingSquare.isWormhole()) {
-            landingSquareNumber = landingSquare.getWormhole();
-        }
-
-        user.setSquareNumber(landingSquareNumber);
-
-        DiceThrowResult diceThrowResult = new DiceThrowResult();
-        diceThrowResult.setDiceThrowLandingSquare(landingSquareNumber);
-        diceThrowResult.setDiceThrowResult(dieResult);
-        diceThrowResult.setLastPlayerId(lobby.getCurrentPlayerId());
-
-        boolean userWon = user.getSquareNumber() == lobby.getBoard().getGoal();
-        if (userWon) {
-            diceThrowResult.setWinningPlayerId(user.getPlayerNumber());
-            diceThrowResult.setGameEnded(true);
-
-            lobbyRepository.delete(lobby);
-        } else {
-            userService.save(user);
-
-            int nextPlayerId = (lobby.getCurrentPlayerId() % lobby.getUsers().size()) + 1;
-            diceThrowResult.setNextPlayerId(nextPlayerId);
-
-            lobby.setCurrentPlayerId(nextPlayerId);
-            lobbyRepository.save(lobby);
-        }
-
-        return diceThrowResult;
-    }
 
     public void save(Lobby lobby) {
         lobbyRepository.save(lobby);
     }
 
-    public int getRandomDieThrow() {
+    private int getRandomDieThrow() {
         return random.nextInt(6) + 1;
     }
 }
