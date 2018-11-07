@@ -25,8 +25,6 @@ spring.session.store-type = none
 
 spring.freemarker.suffix = .ftlh
 spring.freemarker.cache = true
-
-api.url = <your-api-url>
 ```
 Simply replace <your-api-url> with the actual API URL.
 
