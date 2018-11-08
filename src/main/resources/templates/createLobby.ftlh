@@ -51,7 +51,7 @@
                 <button class="btn btn-block btn-primary" id="werewolf2" onclick="setRole(this)">Werewolf 2</button>
                 <hr>
                 <div class="text-danger" id="errorlabel"></div>
-                <button class="btn btn-block btn-success" id="btndone">Done</button>
+                <button class="btn btn-block btn-success" id="btndone">Create Lobby</button>
             </div>
         </div>
     </div>
