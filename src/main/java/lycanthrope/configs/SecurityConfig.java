@@ -26,7 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests().antMatchers("/").permitAll()
-                .and().authorizeRequests().antMatchers("/boards*", "/game*").hasRole("default")
+                .and().authorizeRequests().antMatchers("/lobbies*", "/game*").hasRole("default")
                 .and().formLogin().loginPage("/")
                 .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")).invalidateHttpSession(true)
                 .logoutSuccessUrl("/").and().exceptionHandling();

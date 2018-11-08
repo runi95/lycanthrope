@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import lycanthrope.models.*;
 import lycanthrope.services.LobbyService;
 import lycanthrope.services.UserService;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -55,6 +57,19 @@ public class WebSocketController {
         webSocketResponseMessage.setStatus(200);
 
         return webSocketResponseMessage;
+    }
+
+    @MessageMapping("/getLobbies")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<List<Lobby>> getLobbies() {
+        List<Lobby> lobbies = lobbyService.getAllLobbies();
+        WebSocketResponseMessage<List<Lobby>> message = new WebSocketResponseMessage<>();
+
+        message.setContent(lobbies);
+        message.setAction("populatelobbies");
+        message.setStatus(200);
+
+        return message;
     }
 
     private WebSocketResponseMessage errorResponse(String message) {

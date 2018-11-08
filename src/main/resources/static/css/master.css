@@ -3,21 +3,21 @@ body {
     background: #333333;
 }
 
-#boardtable > div {
+#lobbytable > div {
     margin-bottom: 10px;
 }
 
-#boardtable > div > h4 {
+#lobbytable > div > h4 {
     margin-top: 10px;
 }
 
-#boardtable > div {
+#lobbytable > div {
     border: 3px solid #2e2e2e;
     border-radius: 16px;
     background: #414141;
 }
 
-#boardtable > div > button {
+#lobbytable > div > button {
     margin-top: 10px;
     margin-bottom: 10px;
 }

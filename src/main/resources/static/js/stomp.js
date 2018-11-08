@@ -66,7 +66,7 @@ function connect() {
         });
 
         stompClient.event
-        getBoards();
+        getLobbies();
     }, function () {
         setConnected(false);
     });
@@ -81,8 +81,8 @@ function disconnect() {
     }
 }
 
-function getBoards() {
-    stompClient.send("/websock/getBoards", {}, null);
+function getLobbies() {
+    stompClient.send("/websock/getLobbies", {}, null);
 }
 
 function joinLobby(lobbyId) {

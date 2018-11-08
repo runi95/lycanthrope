@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import lycanthrope.models.*;
 import lycanthrope.repositories.LobbyRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
@@ -22,6 +23,10 @@ public class LobbyService {
     private UserService userService;
 
     private Random random = new Random();
+
+    public List<Lobby> getAllLobbies() {
+        return lobbyRepository.findAll();
+    }
 
     public Optional<Lobby> findLobbyById(int boardId) {
         return lobbyRepository.findById(boardId);

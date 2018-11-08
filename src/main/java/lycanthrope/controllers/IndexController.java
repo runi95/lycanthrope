@@ -53,7 +53,7 @@ public class IndexController {
             auth.setDetails(new WebAuthenticationDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            return "redirect:/boards";
+            return "redirect:/lobbies";
         } else {
 
             // If this log entry is spammed too much then we might want to consider removing it!

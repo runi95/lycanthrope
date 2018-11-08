@@ -8,8 +8,8 @@ function changeView(view) {
 
 function handleActions(message) {
     switch (message.action) {
-        case "populateboardtable":
-            populateBoardTable(message.content);
+        case "populatelobbies":
+            populateLobbies(message.content);
             break;
         case "loadlobby":
             loadLobby(message.content);
@@ -57,7 +57,7 @@ function diceResult(diceThrow) {
     $("#p" + diceThrow.diceThrowLandingSquare).append(div);
 }
 
-function populateBoardTable(boards) {
+function populateLobbies(boards) {
     for (var i = 0; i < boards.length; i++) {
         var board = document.createElement("div");
         var name = document.createElement("h4");
@@ -79,7 +79,7 @@ function populateBoardTable(boards) {
         board.appendChild(description);
         board.appendChild(btn);
 
-        $("#boardtable").append(board);
+        $("#lobbytable").append(board);
     }
 }
 
@@ -139,7 +139,7 @@ function joinGame(id) {
 
 function joinBoard(id) {
     $.ajax({
-        url: '/boards/' + id,
+        url: '/lobby/' + id,
         type: "GET",
         success: function (result) {
             changeView(result);
