@@ -27,7 +27,7 @@
           href="/css/master.css" async/>
 </head>
 <body>
-<div style="position: fixed; left: 10px; bottom: 10px;">
+<div style="position: fixed; left: 10px; bottom: 6px; z-index: 1000;">
     Connection: <span id="connected" class="text-success text-hide">connected</span><span id="disconnected" class="text-danger">disconnected</span><span id="connecting" class="text-warning text-hide">connecting...</span>
 </div>
 <div id="nest">
