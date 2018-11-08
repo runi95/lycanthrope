@@ -14,9 +14,6 @@ function handleActions(message) {
         case "loadlobby":
             loadLobby(message.content);
             break;
-        case "diceresult":
-            diceResult(message.content);
-            break;
         case "disconnected":
             disconnectPlayer(message.content);
             break;
@@ -31,30 +28,6 @@ function disconnectPlayer(leavingPlayer) {
         playerElement.setAttribute("id", "");
         playerElement.setAttribute("class", "list-group-item list-group-item-empty");
     }
-}
-
-function diceResult(diceThrow) {
-    if (diceThrow.lastPlayerId == playerNumber) {
-        $("#diceimg").attr("src", "/img/Dice_" + diceThrow.diceThrowResult + ".png");
-    }
-
-    if (diceThrow.gameEnded) {
-        $("#ul" + diceThrow.winningPlayerId).append(document.createTextNode(" (winner)"));
-    } else {
-        if (diceThrow.nextPlayerId == playerNumber) {
-            if($("#diceButton").hasClass("disabled")) {
-                $("#diceButton").removeClass("disabled");
-                $("#diceButton").prop('disabled', false);
-            }
-        }
-    }
-
-    $("#u" + diceThrow.lastPlayerId).remove();
-    var div = document.createElement("div");
-    div.setAttribute("id", "u" + diceThrow.lastPlayerId);
-    div.setAttribute("class", "player player-" + diceThrow.lastPlayerId);
-
-    $("#p" + diceThrow.diceThrowLandingSquare).append(div);
 }
 
 function populateLobbies(boards) {
