@@ -10,4 +10,9 @@ public class LobbyController {
     public String getMainPage() {
         return "lobbies";
     }
+
+    @GetMapping("/createLobby")
+    public String getCreateLobby() {
+        return "createLobby";
+    }
 }
