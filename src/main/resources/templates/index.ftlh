@@ -2,13 +2,13 @@
 <@m.master>
 <div class="container">
     <div class="row">
-        <div class="col-8 offset-2">
+        <div class="col-sm-12">
             <div class="text-center">
                 <h1>
-                    Welcome to Space Worms!
+                    Lycanthrope
                 </h1>
             </div>
-            <div class="col-8 offset-2">
+            <div class="col-sm-12">
                 <div class="login-box">
                     <form id="loginForm" name="loginForm" action="/setNick" method="POST">
 				        <#if _csrf??>
