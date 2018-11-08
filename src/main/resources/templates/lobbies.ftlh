@@ -2,7 +2,7 @@
 <@m.websockmaster>
 <div class="container">
     <div class="row">
-        <div class="col-8 offset-2">
+        <div class="col-sm-12">
             <div class="text-center">
                 <h1>
                     Lycanthrope
