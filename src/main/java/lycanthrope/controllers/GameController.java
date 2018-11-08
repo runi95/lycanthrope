@@ -79,4 +79,9 @@ public class GameController {
 
         return "gameDay";
     }
+
+    @GetMapping("/createlobby")
+    public String getCreateLobby() {
+        return "createLobby";
+    }
 }
