@@ -3,3 +3,4 @@ Lycanthrope.iml
 target
 src/main/resources/application.properties
 LycanthropeDB.mv.db
+LycanthropeDB.trace.db
