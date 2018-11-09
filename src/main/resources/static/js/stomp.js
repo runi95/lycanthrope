@@ -89,6 +89,6 @@ function joinLobby(lobbyId) {
     stompClient.send("/websock/joinLobby", {}, JSON.stringify({"action": "join", "value": lobbyId}));
 }
 
-function rollDice() {
-    stompClient.send("/websock/rollDice", {}, null);
+function createLobby(data) {
+    stompClient.send("/websock/createLobby", {}, JSON.stringify({"action": "create", "value": data}));
 }

@@ -16,13 +16,11 @@ public class User {
     private String nickname;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn
     @JsonBackReference
     private Lobby lobby;
 
     private int playerNumber;
-
-    private int squareNumber;
 
     // Just in case we want to add roles at some point.
     private String role = "default";
@@ -38,9 +36,6 @@ public class User {
     public Lobby getLobby() { return lobby; }
     public void setLobby(Lobby lobby) { this.lobby = lobby; }
 
-    public int getSquareNumber() { return squareNumber; }
-    public void setSquareNumber(int squareNumber) { this.squareNumber = squareNumber; }
-
     public int getPlayerNumber() { return playerNumber; }
     public void setPlayerNumber(int playerNumber) { this.playerNumber = playerNumber; }
 
@@ -51,7 +46,6 @@ public class User {
                 ", nickname='" + nickname + '\'' +
                 ", lobby=" + lobby +
                 ", playerNumber=" + playerNumber +
-                ", squareNumber=" + squareNumber +
                 ", role='" + role + '\'' +
                 '}';
     }

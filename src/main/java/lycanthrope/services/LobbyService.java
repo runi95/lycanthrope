@@ -65,15 +65,10 @@ public class LobbyService {
         try {
             joinLobbySemaphore.acquire();
 
-            if (lobby.getUsers().size() < 4) {
-                user.setPlayerNumber(lobby.getUsers().size() + 1);
-
-                // TODO: Get rid of some of the saves here, we don't need this many!
-                userService.save(user);
-
+            if (lobby.getCurrentPlayerSize() < lobby.getLobbyMaxSize()) {
                 lobby.addUser(user);
 
-                if (lobby.getUsers().size() == 2) {
+                if (lobby.getCurrentPlayerSize() == lobby.getLobbyMaxSize()) {
                     lobby.setStarted(true);
                 }
 

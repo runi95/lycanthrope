@@ -51,8 +51,9 @@
                 <button class="btn btn-block btn-primary" id="werewolf2" onclick="setRole(this)">Werewolf 2</button>
                 <hr>
                 <div class="text-danger" id="errorlabel"></div>
-                <button class="btn btn-block btn-success" id="btndone">Create Lobby</button>
+                <button class="btn btn-block btn-success" id="btndone" onclick="createNewLobby(activeRoles, players)">Create Lobby</button>
             </div>
+            <br>
         </div>
     </div>
 </div>

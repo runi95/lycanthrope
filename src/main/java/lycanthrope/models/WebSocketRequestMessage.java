@@ -1,9 +1,9 @@
 package lycanthrope.models;
 
-public class WebSocketRequestMessage {
+public class WebSocketRequestMessage<V> {
 
     private String action;
-    private String value;
+    private V value;
 
     public String getAction() {
         return action;
@@ -13,11 +13,11 @@ public class WebSocketRequestMessage {
         this.action = action;
     }
 
-    public String getValue() {
+    public V getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(V value) {
         this.value = value;
     }
 }

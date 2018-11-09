@@ -2,6 +2,9 @@ var lobbies = {};
 var currentLobbyId;
 var playerNumber;
 
+var csrf_name = $('meta[name="csrf_name"]').attr('content');
+var csrf_value = $('meta[name="csrf_value"]').attr('content');
+
 function changeView(view) {
     $("#nest").html(view);
 }
@@ -11,12 +14,28 @@ function handleActions(message) {
         case "populatelobbies":
             populateLobbies(message.content);
             break;
+        case "createLobby":
+            console.log("createLobby");
+            populateNewLobby(message.content);
+            break;
         case "loadlobby":
             loadLobby(message.content);
             break;
         case "disconnected":
             disconnectPlayer(message.content);
             break;
+    }
+}
+
+function populateNewLobby(newLobby) {
+    lobbies[newLobby.key.id] = newLobby.key;
+
+    console.log($("meta[name=nickname]").attr("content") + " === " + newLobby.val);
+
+    if ($("meta[name=nickname]").attr("content") === newLobby.val) {
+        createLobbyPrivate(newLobby.key);
+    } else {
+        addLobbyToLobbyTable(newLobby.key);
     }
 }
 
@@ -30,30 +49,33 @@ function disconnectPlayer(leavingPlayer) {
     }
 }
 
-function populateLobbies(boards) {
-    for (var i = 0; i < boards.length; i++) {
-        var board = document.createElement("div");
-        var name = document.createElement("h4");
-        var hr = document.createElement("hr");
-        var size = document.createElement("div");
-        var description = document.createElement("div");
-        var btn = document.createElement("button");
-        btn.classList.add("btn", "btn-primary");
-        btn.setAttribute("onClick", "joinBoard(" + boards[i].id + ")");
-
-        name.appendChild(document.createTextNode(boards[i].name));
-        size.appendChild(document.createTextNode(boards[i].size));
-        description.appendChild(document.createTextNode(boards[i].description));
-        btn.appendChild(document.createTextNode("Join"));
-
-        board.appendChild(name);
-        board.appendChild(hr);
-        board.appendChild(size);
-        board.appendChild(description);
-        board.appendChild(btn);
-
-        $("#lobbytable").append(board);
+function populateLobbies(lobbies) {
+    for (var i = 0; i < lobbies.length; i++) {
+        addLobbyToLobbyTable(lobbies[i]);
     }
+}
+
+function addLobbyToLobbyTable(lobby) {
+    var lobbyDiv = document.createElement("div");
+    var name = document.createElement("h4");
+    var hr = document.createElement("hr");
+    var lobbySize = document.createElement("div");
+    var btn = document.createElement("button");
+    btn.classList.add("btn", "btn-primary");
+    btn.setAttribute("onClick", "joinLobbyRequest(" + lobby.id + ")");
+
+    name.appendChild(document.createTextNode(lobby.name));
+    lobbySize.appendChild(document.createTextNode(lobby.currentPlayerSize + "/" + lobby.lobbyMaxSize));
+    btn.appendChild(document.createTextNode("Join"));
+
+    lobbySize.setAttribute("id", lobby.id + "s");
+
+    lobbyDiv.appendChild(name);
+    lobbyDiv.appendChild(hr);
+    lobbyDiv.appendChild(lobbySize);
+    lobbyDiv.appendChild(btn);
+
+    $("#lobbytable").append(lobbyDiv);
 }
 
 function loadLobby(message) {
@@ -97,22 +119,51 @@ function loadLobby(message) {
     }
 }
 
+function createLobbyPrivate(lobby) {
+    $.ajax({
+        url: "/lobby/" + lobby.id,
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+            currentLobbyId = lobby.id;
+            loadLobby(lobby);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
 function joinGame(id) {
     $.ajax({
-        url: '/game/' + id,
+        url: "/game/" + id,
         type: "GET",
         success: function (result) {
             changeView(result);
         },
         error: function (error) {
-            console.log("Error: " + error);
+            console.log(error);
         }
     });
 }
 
-function joinBoard(id) {
+function loadLobbyView(id) {
     $.ajax({
-        url: '/lobby/' + id,
+        url: "/lobby/" + id,
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+            currentLobbyId = id;
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function joinLobbyRequest(id) {
+    $.ajax({
+        url: "/lobby/" + id,
         type: "GET",
         success: function (result) {
             changeView(result);
@@ -120,16 +171,37 @@ function joinBoard(id) {
             joinLobby(id);
         },
         error: function (error) {
-            console.log("Error: " + error);
+            console.log(error);
         }
     });
 }
 
-function rollDiceAction() {
-    if(!$("#diceButton").hasClass("disabled")) {
-        $("#diceButton").addClass("disabled");
-        $("#diceButton").prop('disabled', true);
-    }
+function getCreateLobbyView() {
+    $.ajax({
+        url: "/createLobby",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
 
-    rollDice();
+function createNewLobby(roles, playerSize) {
+    createLobby({key: roles, val: playerSize});
+}
+
+function loadLobbies() {
+    $.ajax({
+        url: "/lobbies",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
 }
