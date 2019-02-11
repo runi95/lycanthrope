@@ -28,7 +28,7 @@ public class GameController {
     private PlayerRoleService playerRoleService;
 
     @GetMapping("/game")
-    public String getGame(@PathVariable(name = "lobbyId") Integer lobbyId, Model model, Principal principal) throws Exception {
+    public String getGame(Model model, Principal principal) throws Exception {
         /*
         if (lobbyId == null) {
             throw new Exception("lobbyId can't be null");
