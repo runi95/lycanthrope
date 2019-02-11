@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Space Worms</title>
+    <title>Lycanthrope</title>
     <meta name="description" content="The ultimate board game!">
     <meta charset="UTF-8">
     <meta name="keywords" content="gaming, board games, board, game, board game, space, worms, worm">
