@@ -6,6 +6,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import lycanthrope.models.*;
 import lycanthrope.repositories.LobbyRepository;
+
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
@@ -129,7 +130,7 @@ public class LobbyService {
                 int lobbyId = lobby.getId();
                 taskScheduler.schedule(() -> {
                     scheduleRoleReveal(lobbyId);
-                }, new Date(System.currentTimeMillis() + 30000));
+                }, new Date(System.currentTimeMillis() + 5000)); // Used to be 30000
             }
 
             return Optional.of(lobby);
@@ -164,7 +165,7 @@ public class LobbyService {
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
         taskScheduler.schedule(() -> {
             scheduleNightAction(lobbyId);
-        }, new Date(System.currentTimeMillis() + 20000));
+        }, new Date(System.currentTimeMillis() + 10000)); // Used to be 20000
     }
 
     private void scheduleNightAction(int lobbyId) {
@@ -192,18 +193,20 @@ public class LobbyService {
 
         if (robber != null) {
             try {
-                int robberTarget = Integer.parseInt(drunk.getPlayer().getNightActionTarget().substring(1));
+                if (robber.getPlayer().getNightActionTarget() != null) {
+                    int robberTarget = Integer.parseInt(robber.getPlayer().getNightActionTarget().substring(1));
 
-                Optional<User> optionalRobberTargetUser = userService.findById(robberTarget);
-                if (optionalRobberTargetUser.isPresent()) {
-                    int robberNewRole = optionalRobberTargetUser.get().getPlayer().getRoleId();
-                    int robberOldRole = robber.getPlayer().getRoleId();
+                    Optional<User> optionalRobberTargetUser = userService.findById(robberTarget);
+                    if (optionalRobberTargetUser.isPresent()) {
+                        int robberNewRole = optionalRobberTargetUser.get().getPlayer().getRoleId();
+                        int robberOldRole = robber.getPlayer().getRoleId();
 
-                    robber.getPlayer().setRoleId(robberNewRole);
-                    userService.save(robber);
+                        robber.getPlayer().setRoleId(robberNewRole);
+                        userService.save(robber);
 
-                    optionalRobberTargetUser.get().getPlayer().setRoleId(robberOldRole);
-                    userService.save(optionalRobberTargetUser.get());
+                        optionalRobberTargetUser.get().getPlayer().setRoleId(robberOldRole);
+                        userService.save(optionalRobberTargetUser.get());
+                    }
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
@@ -216,32 +219,34 @@ public class LobbyService {
 
         if (drunk != null) {
             try {
-                int drunkTarget = Integer.parseInt(drunk.getPlayer().getNightActionTarget().substring(1));
+                if (drunk.getPlayer().getNightActionTarget() != null) {
+                    int drunkTarget = Integer.parseInt(drunk.getPlayer().getNightActionTarget().substring(1));
 
-                if (drunkTarget == 1) {
-                    int drunkNewRole = optionalLobby.get().getNeutralOne();
-                    int drunkOldRole = drunk.getPlayer().getRoleId();
+                    if (drunkTarget == 1) {
+                        int drunkNewRole = optionalLobby.get().getNeutralOne();
+                        int drunkOldRole = drunk.getPlayer().getRoleId();
 
-                    drunk.getPlayer().setRoleId(drunkNewRole);
-                    playerService.save(drunk.getPlayer());
+                        drunk.getPlayer().setRoleId(drunkNewRole);
+                        playerService.save(drunk.getPlayer());
 
-                    optionalLobby.get().setNeutralOne(drunkOldRole);
-                } else if (drunkTarget == 2) {
-                    int drunkNewRole = optionalLobby.get().getNeutralTwo();
-                    int drunkOldRole = drunk.getPlayer().getRoleId();
+                        optionalLobby.get().setNeutralOne(drunkOldRole);
+                    } else if (drunkTarget == 2) {
+                        int drunkNewRole = optionalLobby.get().getNeutralTwo();
+                        int drunkOldRole = drunk.getPlayer().getRoleId();
 
-                    drunk.getPlayer().setRoleId(drunkNewRole);
-                    playerService.save(drunk.getPlayer());
+                        drunk.getPlayer().setRoleId(drunkNewRole);
+                        playerService.save(drunk.getPlayer());
 
-                    optionalLobby.get().setNeutralTwo(drunkOldRole);
-                } else if (drunkTarget == 3) {
-                    int drunkNewRole = optionalLobby.get().getNeutralThree();
-                    int drunkOldRole = drunk.getPlayer().getRoleId();
+                        optionalLobby.get().setNeutralTwo(drunkOldRole);
+                    } else if (drunkTarget == 3) {
+                        int drunkNewRole = optionalLobby.get().getNeutralThree();
+                        int drunkOldRole = drunk.getPlayer().getRoleId();
 
-                    drunk.getPlayer().setRoleId(drunkNewRole);
-                    playerService.save(drunk.getPlayer());
+                        drunk.getPlayer().setRoleId(drunkNewRole);
+                        playerService.save(drunk.getPlayer());
 
-                    optionalLobby.get().setNeutralThree(drunkOldRole);
+                        optionalLobby.get().setNeutralThree(drunkOldRole);
+                    }
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
