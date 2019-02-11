@@ -4,7 +4,9 @@ public interface PlayerRole {
 
     boolean isAbleToPerformOnDeathAction();
 
-    int getOrderRank();
-
     Team getTeam();
+
+    String getName();
+
+    NightAction[] getNightActions(Lobby lobby);
 }

@@ -1,0 +1,56 @@
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="text-center margin-top">
+                <h3>Role Reveal</h3>
+                <div class="progress" style="height: 1px;">
+                    <div id="progressbar" class="progress-bar" role="progressbar" style="width: 100%;"></div>
+                </div>
+                <br>
+                <div>
+                    Your role is
+                </div>
+                <div style="background: black; min-height: 60px; width: 100%; max-width: 300px; margin: auto; word-break: break-all;"
+                     onclick="revealRole()">
+                    <h1 class="text-danger" id="rolediv"></h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .margin-top {
+        margin-top: 10px;
+    }
+</style>
+<script>
+    var progress = 100;
+    var intervalInMilliseconds = 1000 / 100 * 10;
+    var intervalTimer = setInterval(updateProgressBar, intervalInMilliseconds);
+    var isRoleRevealed = false;
+    var roleName = "${roleName}";
+
+    function updateProgressBar() {
+        if (progress > 0) {
+            var elem = document.getElementById("progressbar");
+            progress--;
+            elem.setAttribute("style", "width: " + progress + "%");
+        } else {
+            if (progress > -5) {
+                progress--;
+            } else {
+                revealRole();
+            }
+        }
+    }
+
+    function revealRole() {
+        if (!isRoleRevealed) {
+            isRoleRevealed = true;
+
+            document.getElementById("progressbar").setAttribute("style", "width: 0%");
+            clearInterval(intervalTimer);
+            document.getElementById("rolediv").appendChild(document.createTextNode(roleName));
+        }
+    }
+</script>

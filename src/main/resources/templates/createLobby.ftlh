@@ -29,18 +29,13 @@
                     Which roles should be in play?
                 </div>
                 <button class="btn btn-block btn-primary" id="hunter" onclick="setRole(this)">Hunter</button>
-                <button class="btn btn-block btn-primary" id="beholder" onclick="setRole(this)">Beholder</button>
                 <button class="btn btn-block btn-primary" id="drunk" onclick="setRole(this)">Drunk</button>
                 <button class="btn btn-block btn-primary" id="insomniac" onclick="setRole(this)">Insomniac</button>
-                <button class="btn btn-block btn-primary" id="squire" onclick="setRole(this)">Squire</button>
-                <button class="btn btn-block btn-primary" id="auraseer" onclick="setRole(this)">Aura Seer</button>
                 <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button>
                 <button class="btn btn-block btn-primary" id="robber" onclick="setRole(this)">Robber</button>
                 <button class="btn btn-block btn-primary" id="seer" onclick="setRole(this)">Seer</button>
-                <button class="btn btn-block btn-primary" id="thing" onclick="setRole(this)">Thing</button>
                 <button class="btn btn-block btn-primary" id="mason1" onclick="setRole(this)">Mason 1</button>
                 <button class="btn btn-block btn-primary" id="mason2" onclick="setRole(this)">Mason 2</button>
-                <button class="btn btn-block btn-primary" id="apprenticetanner" onclick="setRole(this)">Apprentice Tanner</button>
                 <button class="btn btn-block btn-primary" id="tanner" onclick="setRole(this)">Tanner</button>
                 <button class="btn btn-block btn-primary" id="minion" onclick="setRole(this)">Minion</button>
                 <button class="btn btn-block btn-primary" id="doppelganger" onclick="setRole(this)">Doppelgänger</button>
@@ -84,18 +79,13 @@
 
     var activeRoles = {
         "hunter": false,
-        "beholder": false,
         "drunk": false,
         "insomniac": false,
-        "squire": false,
-        "auraseer": false,
         "troublemaker": false,
         "robber": false,
         "seer": false,
-        "thing": false,
         "mason1": false,
         "mason2": false,
-        "apprenticetanner": false,
         "tanner": false,
         "minion": false,
         "doppelganger": false,

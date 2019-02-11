@@ -1,5 +1,6 @@
 package lycanthrope.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -15,7 +16,6 @@ public class Lobby {
     private int id;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "lobby", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-    @OrderBy("playerNumber ASC")
     private List<User> users = new ArrayList<>();
 
     @ElementCollection
@@ -25,13 +25,36 @@ public class Lobby {
     @LazyCollection(LazyCollectionOption.FALSE)
     private Collection<Roles> roles = new ArrayList<>();
 
-    private String name;
+    @JsonIgnore
+    private int neutralOne;
 
-    private boolean started = false;
+    @JsonIgnore
+    private int neutralTwo;
+
+    @JsonIgnore
+    private int neutralThree;
+
+    /**
+     * state values:
+     * 0 = invalid
+     * 1 = in lobby
+     * 2 = in game (role reveal)
+     * 3 = in game (night action)
+     * 4 = in game (discussion)
+     * 5 = in game (end game vote)
+     *
+     * Anything above this is invalid
+     */
+    private int state;
+
+    private String name;
 
     private int lobbyMaxSize;
 
     private int currentPlayerSize = 0;
+
+    @JsonIgnore
+    private boolean loneWolf;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -39,8 +62,8 @@ public class Lobby {
     public List<User> getUsers() { return users; }
     public void setUsers(List<User> users) { this.users = users; }
 
-    public boolean isStarted() { return started; }
-    public void setStarted(boolean started) { this.started = started; }
+    public int getState() { return state; }
+    public void setState(int state) { this.state = state; }
 
     public int getLobbyMaxSize() { return lobbyMaxSize; }
     public void setLobbyMaxSize(int lobbyMaxSize) { this.lobbyMaxSize = lobbyMaxSize; }
@@ -50,6 +73,18 @@ public class Lobby {
 
     public Collection<Roles> getRoles() { return roles; }
     public void setRoles(Collection<Roles> roles) { this.roles = roles; }
+
+    public boolean isLoneWolf() { return loneWolf; }
+    public void setLoneWolf(boolean loneWolf) { this.loneWolf = loneWolf; }
+
+    public int getNeutralOne() { return neutralOne; }
+    public void setNeutralOne(int neutralOne) { this.neutralOne = neutralOne; }
+
+    public int getNeutralTwo() { return neutralTwo; }
+    public void setNeutralTwo(int neutralTwo) { this.neutralTwo = neutralTwo; }
+
+    public int getNeutralThree() { return neutralThree; }
+    public void setNeutralThree(int neutralThree) { this.neutralThree = neutralThree; }
 
     public int getCurrentPlayerSize() { return currentPlayerSize; }
 
@@ -63,14 +98,12 @@ public class Lobby {
 
         currentPlayerSize++;
         user.setLobby(this);
-        user.setPlayerNumber(currentPlayerSize);
         this.users.add(user);
     }
 
     public void removeUser(User user) {
         currentPlayerSize--;
         user.setLobby(null);
-        user.setPlayerNumber(0);
         this.users.remove(user);
     }
 

@@ -11,6 +11,9 @@ function changeView(view) {
 
 function handleActions(message) {
     switch (message.action) {
+        case "changeView":
+            changeView(message.content);
+            break;
         case "populatelobbies":
             populateLobbies(message.content);
             break;
@@ -23,6 +26,12 @@ function handleActions(message) {
             break;
         case "disconnected":
             disconnectPlayer(message.content);
+            break;
+        case "requestNightAction":
+            getNightAction();
+            break;
+        case "requestGame":
+            getGame();
             break;
     }
 }
@@ -82,7 +91,7 @@ function loadLobby(message) {
     lobbies[message.id] = lobbies;
 
     if (message.id === currentLobbyId) {
-        if (message.started) {
+        if (message.state >= 2) {
             // TODO: This is definitely not the best way to find our playerNumber, it should be changed in the future!
             for (var i = 0; i < message.users.length; i++) {
                 if ($("meta[name=nickname]").attr("content") === message.users[i].nickname) {
@@ -90,7 +99,7 @@ function loadLobby(message) {
                 }
             }
 
-            joinGame(message.id);
+            joinGame(message);
         } else {
             for (var i = 0; i < message.users.length; i++) {
                 var playerElement = document.getElementById(message.users[i].id);
@@ -134,9 +143,16 @@ function createLobbyPrivate(lobby) {
     });
 }
 
-function joinGame(id) {
+function joinGame(lobby) {
+    var url;
+    if (lobby.state === 2) {
+        url = "/game/" + lobby.id + "/roleReveal";
+    } else {
+        url = "/game/" + lobby.id;
+    }
+
     $.ajax({
-        url: "/game/" + id,
+        url: url,
         type: "GET",
         success: function (result) {
             changeView(result);
@@ -196,6 +212,32 @@ function createNewLobby(roles, playerSize) {
 function loadLobbies() {
     $.ajax({
         url: "/lobbies",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function getNightAction() {
+    $.ajax({
+        url: "/nightAction",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function getGame() {
+    $.ajax({
+        url: "/game",
         type: "GET",
         success: function (result) {
             changeView(result);

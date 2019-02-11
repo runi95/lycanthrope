@@ -65,7 +65,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             return;
         }
 
-        if (!optionalUser.get().getLobby().isStarted() || optionalUser.get().getLobby().getUsers().size() > 2) {
+        if (optionalUser.get().getLobby().getState() > 1 || optionalUser.get().getLobby().getUsers().size() > 2) {
             Lobby lobby = optionalUser.get().getLobby();
             lobby.removeUser(optionalUser.get());
             userService.save(optionalUser.get());

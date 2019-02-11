@@ -6,4 +6,8 @@ public interface NightAction {
     boolean isAbleToTargetOtherPlayers();
 
     boolean isAbleToTargetSelf();
+
+    boolean isAbleToViewCertainRoles();
+
+    Roles[] getViewableRoles();
 }

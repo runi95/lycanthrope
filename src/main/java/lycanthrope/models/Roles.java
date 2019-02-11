@@ -2,18 +2,13 @@ package lycanthrope.models;
 
 public enum Roles {
     HUNTER,
-    BEHOLDER,
     DRUNK,
     INSOMNIAC,
-    SQUIRE,
-    AURASEER,
     TROUBLEMAKER,
     ROBBER,
     SEER,
-    THING,
     MASON1,
     MASON2,
-    APPRENTICETANNER,
     TANNER,
     MINION,
     DOPPELGANGER,

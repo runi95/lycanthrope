@@ -12,7 +12,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String nickname;
 
     @ManyToOne
@@ -20,7 +20,8 @@ public class User {
     @JsonBackReference
     private Lobby lobby;
 
-    private int playerNumber;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Player player;
 
     // Just in case we want to add roles at some point.
     private String role = "default";
@@ -36,8 +37,8 @@ public class User {
     public Lobby getLobby() { return lobby; }
     public void setLobby(Lobby lobby) { this.lobby = lobby; }
 
-    public int getPlayerNumber() { return playerNumber; }
-    public void setPlayerNumber(int playerNumber) { this.playerNumber = playerNumber; }
+    public Player getPlayer() { return player; }
+    public void setPlayer(Player player) { this.player = player; }
 
     @Override
     public String toString() {
@@ -45,7 +46,6 @@ public class User {
                 "id=" + id +
                 ", nickname='" + nickname + '\'' +
                 ", lobby=" + lobby +
-                ", playerNumber=" + playerNumber +
                 ", role='" + role + '\'' +
                 '}';
     }
