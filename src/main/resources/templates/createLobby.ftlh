@@ -31,7 +31,7 @@
                 <button class="btn btn-block btn-primary" id="hunter" onclick="setRole(this)">Hunter</button>
                 <button class="btn btn-block btn-primary" id="drunk" onclick="setRole(this)">Drunk</button>
                 <button class="btn btn-block btn-primary" id="insomniac" onclick="setRole(this)">Insomniac</button>
-                <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button>
+                <!-- <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button> -->
                 <button class="btn btn-block btn-primary" id="robber" onclick="setRole(this)">Robber</button>
                 <button class="btn btn-block btn-primary" id="seer" onclick="setRole(this)">Seer</button>
                 <button class="btn btn-block btn-primary" id="mason1" onclick="setRole(this)">Mason 1</button>
@@ -67,9 +67,9 @@
     var stage = 1;
 
     var recommendedRoleSetups = {
-        3: ["werewolf1", "werewolf2", "robber", "tanner", "drunk", "doppelganger"],
-        4: ["werewolf1", "werewolf2", "robber", "tanner", "doppelganger", "villager1", "seer"],
-        5: ["werewolf1", "werewolf2", "robber", "tanner", "seer", "troublemaker", "minion", "doppelganger"],
+        3: ["werewolf1", "werewolf2", "robber", "tanner", "drunk", "troublemaker"],
+        4: ["werewolf1", "werewolf2", "robber", "tanner", "troublemaker", "villager1", "seer"],
+        5: ["werewolf1", "werewolf2", "robber", "tanner", "seer", "troublemaker", "minion", "hunter"],
         6: ["werewolf1", "werewolf2", "robber", "tanner", "seer", "troublemaker", "minion", "drunk", "villager1"],
         7: ["werewolf1", "werewolf2", "robber", "tanner", "seer", "troublemaker", "minion", "drunk", "villager1", "villager2"],
         8: ["werewolf1", "werewolf2", "robber", "tanner", "seer", "troublemaker", "minion", "drunk", "villager1", "villager2", "hunter"],

@@ -1,6 +1,7 @@
 package lycanthrope.controllers;
 
 import freemarker.template.Template;
+import lycanthrope.models.roles.Werewolf;
 import lycanthrope.services.PlayerRoleService;
 import lycanthrope.services.PlayerService;
 import org.slf4j.Logger;
@@ -151,9 +152,9 @@ public class WebSocketController {
                     case "minion":
                         lobby.addRole(Roles.MINION);
                         break;
-                    case "doppelganger":
-                        lobby.addRole(Roles.DOPPELGANGER);
-                        break;
+                    //case "doppelganger":
+                    //    lobby.addRole(Roles.DOPPELGANGER);
+                    //    break;
                     case "villager1":
                         lobby.addRole(Roles.VILLAGER1);
                         break;
@@ -265,9 +266,12 @@ public class WebSocketController {
                     return performRobberAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
                 case 5: // Seer
                     break;
+                /*
                 case 10: // Doppelganger
                     return performDoppelgangerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
+                */
                 default: // Something went wrong
+                    logger.warn("A user with role id " + roleID + " tried to do action " + messageValue);
                     throw new Exception("Someone tried to perform an action with a role that can't perform this action");
             }
 
@@ -280,11 +284,14 @@ public class WebSocketController {
                     return performDrunkAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 case 5: // Seer
                     break;
+                case 10: // Doppelganger
+                    return performDoppelgangerAction(user, targetNeutralId, user.getPlayer().getActionsPerformed(), messageValue);
                 case 14: // Werewolf 1
                     return performWerewolfAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 case 15: // Werewolf 2
                     return performWerewolfAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 default: // Something went wrong
+                    logger.warn("A user with role id " + roleID + " tried to do action " + messageValue);
                     throw new Exception("Someone tried to perform an action with a role that can't perform this action");
             }
         } else {
@@ -309,19 +316,43 @@ public class WebSocketController {
         return parseTemplate("gameNightAction", map);
     }
 
-    private WebSocketResponseMessage<String> performDoppelgangerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
+    private WebSocketResponseMessage<String> performDoppelgangerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
         if (actionsPerformed == 1) {
-            return performNightAction(user, messageValue, target.getPlayer().getRoleId());
-        } else if (actionsPerformed == 0) {
-            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-            user.getPlayer().setNightActionTarget(messageValue);
+            user.getPlayer().setActionsPerformed(0);
+            int targetUserId = Integer.parseInt(messageValue.substring(1));
+            Optional<User> optionalTargetUser = userService.findById(targetUserId);
+            if (!optionalTargetUser.isPresent()) {
+                throw new Exception("Could not find a user with the given target id");
+            }
+
+            return performNightAction(user, messageValue, optionalTargetUser.get().getPlayer().getRoleId());
+        } else {
+            throw new Exception("You have already performed all your actions");
+        }
+    }
+
+    /*
+    private WebSocketResponseMessage<String> performDoppelgangerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
+        if (actionsPerformed == 0 && user.getPlayer().getDoppelgangerTargetId() == null) {
+            // user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+            // user.getPlayer().setNightActionTarget(messageValue);
+            PlayerRole targetRole = playerRoleService.getRole(target.getPlayer().getRoleId());
+
+            user.getPlayer().setRoleId(target.getPlayer().getRoleId());
+            user.getPlayer().setDoppelgangerTargetId(target.getId());
             playerService.save(user.getPlayer());
 
-            NightAction[] nightActions = playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby());
+            NightAction[] nightActions;
+            if (targetRole instanceof Werewolf) {
+                nightActions = new NightAction[]{};
+            } else {
+                nightActions = targetRole.getNightActions(user.getLobby());
+            }
 
             Map map = new HashMap();
-            map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
+            map.put("viewRole", targetRole.getName());
             map.put("userid", user.getId());
+            map.put("lobby", user.getLobby());
 
             if (nightActions.length > 0) {
                 map.put("nightAction", nightActions[0]);
@@ -332,6 +363,7 @@ public class WebSocketController {
             throw new Exception("You have already performed all your actions");
         }
     }
+    */
 
     private WebSocketResponseMessage<String> performDrunkAction(User user, int actionsPerformed, String messageValue) throws Exception {
         if (actionsPerformed > 0) {

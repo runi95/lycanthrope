@@ -30,6 +30,11 @@ public class Player {
     @JsonIgnore
     private String nightActionTargetTwo;
 
+    /*
+    @JsonIgnore
+    private Long doppelgangerTargetId;
+    */
+
     public int getId() { return id; }
 
     public int getRoleId() { return roleId; }
@@ -46,4 +51,9 @@ public class Player {
 
     public String getNightActionTargetTwo() { return nightActionTargetTwo; }
     public void setNightActionTargetTwo(String nightActionTargetTwo) { this.nightActionTargetTwo = nightActionTargetTwo; }
+
+    /*
+    public Long getDoppelgangerTargetId() { return doppelgangerTargetId; }
+    public void setDoppelgangerTargetId(Long doppelgangerTargetId) { this.doppelgangerTargetId = doppelgangerTargetId; }
+    */
 }
