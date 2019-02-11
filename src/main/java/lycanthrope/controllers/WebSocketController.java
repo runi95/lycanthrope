@@ -261,11 +261,11 @@ public class WebSocketController {
 
             switch (roleID) {
                 case 3: // Troublemaker
-                    break;
+                    return performTroublemakerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
                 case 4: // Robber
                     return performRobberAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
                 case 5: // Seer
-                    break;
+                    return performSeerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
                 /*
                 case 10: // Doppelganger
                     return performDoppelgangerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
@@ -283,9 +283,11 @@ public class WebSocketController {
                 case 1: // Drunk
                     return performDrunkAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 case 5: // Seer
-                    break;
+                    return performSeerAction(user, targetNeutralId, user.getPlayer().getActionsPerformed(), messageValue);
+                /*
                 case 10: // Doppelganger
                     return performDoppelgangerAction(user, targetNeutralId, user.getPlayer().getActionsPerformed(), messageValue);
+                */
                 case 14: // Werewolf 1
                     return performWerewolfAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 case 15: // Werewolf 2
@@ -298,7 +300,32 @@ public class WebSocketController {
             throw new Exception("Could not understand what target you chose");
         }
 
-        throw new Exception("Something went wrong");
+        // throw new Exception("Something went wrong");
+    }
+
+    private WebSocketResponseMessage<String> performTroublemakerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
+        if (actionsPerformed == 1) {
+            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+            user.getPlayer().setNightActionTargetTwo(messageValue);
+            playerService.save(user.getPlayer());
+
+            return parseTemplate("gameNightAction", null);
+        } else if (actionsPerformed == 0) {
+            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+            user.getPlayer().setNightActionTarget(messageValue);
+            playerService.save(user.getPlayer());
+
+            Map map = new HashMap();
+            map.put("message", "Swapping " + target.getNickname() + "...");
+            map.put("nightAction", playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby())[actionsPerformed]);
+            map.put("firstTarget", messageValue);
+            map.put("userid", user.getId());
+            map.put("lobby", user.getLobby());
+
+            return parseTemplate("gameNightAction", map);
+        } else {
+            throw new Exception("You have already performed all your actions");
+        }
     }
 
     private WebSocketResponseMessage<String> performRobberAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
@@ -316,6 +343,99 @@ public class WebSocketController {
         return parseTemplate("gameNightAction", map);
     }
 
+    private WebSocketResponseMessage<String> performSeerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
+        if (targetNeutralId < 1 || targetNeutralId > 3) {
+            throw new IllegalArgumentException("targetNeutralId can't be greater than 3 or less than 1");
+        }
+
+        if (actionsPerformed == 0) {
+            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+            user.getPlayer().setNightActionTarget(messageValue);
+            playerService.save(user.getPlayer());
+
+            Map map = new HashMap();
+            switch (targetNeutralId) {
+                case 1:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralOne()).getName());
+                break;
+                case 2:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralTwo()).getName());
+                    break;
+                case 3:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralThree()).getName());
+                    break;
+            }
+
+            map.put("nightAction", playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby())[1]);
+            map.put("firstTarget", messageValue);
+            map.put("userid", user.getId());
+            map.put("lobby", user.getLobby());
+
+            return parseTemplate("gameNightAction", map);
+        } else if (actionsPerformed == 1 && user.getPlayer().getNightActionTarget() != null && user.getPlayer().getNightActionTarget().length() > 0 && user.getPlayer().getNightActionTarget().charAt(0) == 'n') {
+            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+            user.getPlayer().setNightActionTarget(messageValue);
+            playerService.save(user.getPlayer());
+
+            Map map = new HashMap();
+            switch (targetNeutralId) {
+                case 1:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralOne()).getName());
+                    break;
+                case 2:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralTwo()).getName());
+                    break;
+                case 3:
+                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralThree()).getName());
+                    break;
+            }
+
+            return parseTemplate("gameNightAction", map);
+        } else {
+            throw new Exception("You have already performed all your actions");
+        }
+    }
+
+    private WebSocketResponseMessage<String> performSeerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
+        if (actionsPerformed > 0) {
+            throw new Exception("You have already performed all your actions");
+        }
+
+        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+        user.getPlayer().setNightActionTarget(messageValue);
+        playerService.save(user.getPlayer());
+
+        Map map = new HashMap();
+        map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
+
+        return parseTemplate("gameNightAction", null);
+    }
+
+    private WebSocketResponseMessage<String> performDrunkAction(User user, int actionsPerformed, String messageValue) throws Exception {
+        if (actionsPerformed > 0) {
+            throw new Exception("You have already performed all your actions");
+        }
+
+        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+        user.getPlayer().setNightActionTarget(messageValue);
+        playerService.save(user.getPlayer());
+
+        return parseTemplate("gameNightAction", null);
+    }
+
+    private WebSocketResponseMessage<String> performWerewolfAction(User user, int actionsPerformed, String messageValue) throws Exception {
+        if (actionsPerformed > 0) {
+            throw new Exception("You have already performed all your actions");
+        }
+
+        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
+        user.getPlayer().setNightActionTarget(messageValue);
+        playerService.save(user.getPlayer());
+
+        return parseTemplate("gameNightAction", null);
+    }
+
+    /*
     private WebSocketResponseMessage<String> performDoppelgangerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
         if (actionsPerformed == 1) {
             user.getPlayer().setActionsPerformed(0);
@@ -331,7 +451,6 @@ public class WebSocketController {
         }
     }
 
-    /*
     private WebSocketResponseMessage<String> performDoppelgangerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
         if (actionsPerformed == 0 && user.getPlayer().getDoppelgangerTargetId() == null) {
             // user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
@@ -364,28 +483,4 @@ public class WebSocketController {
         }
     }
     */
-
-    private WebSocketResponseMessage<String> performDrunkAction(User user, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed > 0) {
-            throw new Exception("You have already performed all your actions");
-        }
-
-        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-        user.getPlayer().setNightActionTarget(messageValue);
-        playerService.save(user.getPlayer());
-
-        return parseTemplate("gameNightAction", null);
-    }
-
-    private WebSocketResponseMessage<String> performWerewolfAction(User user, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed > 0) {
-            throw new Exception("You have already performed all your actions");
-        }
-
-        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-        user.getPlayer().setNightActionTarget(messageValue);
-        playerService.save(user.getPlayer());
-
-        return parseTemplate("gameNightAction", null);
-    }
 }

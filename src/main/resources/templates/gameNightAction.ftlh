@@ -17,13 +17,20 @@
                     </h1>
                 </div>
             </#if>
+            <#if message ??>
+                <div class="text-center">
+                    ${message}
+                </div>
+            </#if>
             <#if nightAction ??>
                 <#if nightAction.isAbleToTargetOtherPlayers()>
                     <div class="margin-top">
                         <#list lobby.users as user>
                             <#if user.id != userid || nightAction.isAbleToTargetSelf()>
+                                <#if !(firstTarget??) || firstTarget != "u${user.id}">
                                 <button id="u${user.id}" class="btn btn-block btn-primary"
-                                    onclick="performNightAction(this)">${user.nickname}</button>
+                                        onclick="performNightAction(this)">${user.nickname}</button>
+                                </#if>
                             </#if>
                         </#list>
                     </div>
@@ -40,9 +47,21 @@
                 <#if nightAction.isAbleToTargetNeutrals()>
                     <hr>
                     <div>
-                        <button id="n1" class="btn btn-block btn-info" onclick="performNightAction(this)">First Neutral</button>
-                        <button id="n2" class="btn btn-block btn-info" onclick="performNightAction(this)">Second Neutral</button>
-                        <button id="n3" class="btn btn-block btn-info" onclick="performNightAction(this)">Third Neutral</button>
+                        <#if !(firstTarget??) || firstTarget != "n1">
+                            <button id="n1" class="btn btn-block btn-info" onclick="performNightAction(this)">First
+                                Neutral
+                            </button>
+                        </#if>
+                        <#if !(firstTarget??) || firstTarget != "n2">
+                            <button id="n2" class="btn btn-block btn-info" onclick="performNightAction(this)">Second
+                                Neutral
+                            </button>
+                        </#if>
+                        <#if !(firstTarget??) || firstTarget != "n3">
+                            <button id="n3" class="btn btn-block btn-info" onclick="performNightAction(this)">Third
+                                Neutral
+                            </button>
+                        </#if>
                     </div>
                 </#if>
             </#if>

@@ -31,14 +31,14 @@
                 <button class="btn btn-block btn-primary" id="hunter" onclick="setRole(this)">Hunter</button>
                 <button class="btn btn-block btn-primary" id="drunk" onclick="setRole(this)">Drunk</button>
                 <button class="btn btn-block btn-primary" id="insomniac" onclick="setRole(this)">Insomniac</button>
-                <!-- <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button> -->
+                <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button>
                 <button class="btn btn-block btn-primary" id="robber" onclick="setRole(this)">Robber</button>
                 <button class="btn btn-block btn-primary" id="seer" onclick="setRole(this)">Seer</button>
                 <button class="btn btn-block btn-primary" id="mason1" onclick="setRole(this)">Mason 1</button>
                 <button class="btn btn-block btn-primary" id="mason2" onclick="setRole(this)">Mason 2</button>
                 <button class="btn btn-block btn-primary" id="tanner" onclick="setRole(this)">Tanner</button>
                 <button class="btn btn-block btn-primary" id="minion" onclick="setRole(this)">Minion</button>
-                <button class="btn btn-block btn-primary" id="doppelganger" onclick="setRole(this)">Doppelgänger</button>
+                <!-- <button class="btn btn-block btn-primary" id="doppelganger" onclick="setRole(this)">Doppelgänger</button> -->
                 <button class="btn btn-block btn-primary" id="villager1" onclick="setRole(this)">Villager 1</button>
                 <button class="btn btn-block btn-primary" id="villager2" onclick="setRole(this)">Villager 2</button>
                 <button class="btn btn-block btn-primary" id="villager3" onclick="setRole(this)">Villager 3</button>
