@@ -17,7 +17,14 @@
                     </h1>
                 </div>
             </#if>
-            <#if message ??>
+            <#if smallMessage??>
+                <div class="text-center">
+                    <small>
+                        ${message}
+                    </small>
+                </div>
+            </#if>
+            <#if message??>
                 <div class="text-center">
                     ${message}
                 </div>
@@ -28,8 +35,8 @@
                         <#list lobby.users as user>
                             <#if user.id != userid || nightAction.isAbleToTargetSelf()>
                                 <#if !(firstTarget??) || firstTarget != "u${user.id}">
-                                <button id="u${user.id}" class="btn btn-block btn-primary"
-                                        onclick="performNightAction(this)">${user.nickname}</button>
+                                    <button id="u${user.id}" class="btn btn-block btn-primary"
+                                            onclick="performNightAction(this)">${user.nickname}</button>
                                 </#if>
                             </#if>
                         </#list>

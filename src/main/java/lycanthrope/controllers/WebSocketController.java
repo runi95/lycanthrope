@@ -316,7 +316,7 @@ public class WebSocketController {
             playerService.save(user.getPlayer());
 
             Map map = new HashMap();
-            map.put("message", "Swapping " + target.getNickname() + "...");
+            map.put("smallMessage", "Swapping " + target.getNickname() + " with...");
             map.put("nightAction", playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby())[actionsPerformed]);
             map.put("firstTarget", messageValue);
             map.put("userid", user.getId());
