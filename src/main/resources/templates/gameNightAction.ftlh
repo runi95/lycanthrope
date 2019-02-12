@@ -20,7 +20,7 @@
             <#if smallMessage??>
                 <div class="text-center">
                     <small>
-                        ${message}
+                        ${smallMessage}
                     </small>
                 </div>
             </#if>
