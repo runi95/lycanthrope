@@ -31,12 +31,13 @@
 <script>
     var progress = 100;
     var startTime = 10 * 60;
-    var timeLeft = 65;
+    var timeLeft = 600;
     var countdownTimerShown = false;
     var firstVibration = false;
     var intervalTimer = setInterval(updateProgressBar, 1000);
 
     function updateProgressBar() {
+        // console.log("timeLeft: ", timeLeft);
         timeLeft--;
 
         if (timeLeft <= 0) {

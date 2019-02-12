@@ -1,9 +1,6 @@
 package lycanthrope.models.roles;
 
-import lycanthrope.models.Lobby;
-import lycanthrope.models.NightAction;
-import lycanthrope.models.PlayerRole;
-import lycanthrope.models.Team;
+import lycanthrope.models.*;
 
 public class Mason implements PlayerRole {
 
@@ -23,5 +20,28 @@ public class Mason implements PlayerRole {
     }
 
     @Override
-    public NightAction[] getNightActions(Lobby lobby) { return null; }
+    public NightAction[] getNightActions(Lobby lobby) {return new NightAction[]{new NightAction() {
+        @Override
+        public boolean isAbleToTargetNeutrals() {
+            return false;
+        }
+
+        @Override
+        public boolean isAbleToTargetOtherPlayers() {
+            return false;
+        }
+
+        @Override
+        public boolean isAbleToTargetSelf() {
+            return false;
+        }
+
+        @Override
+        public boolean isAbleToViewCertainRoles() { return true; }
+
+        @Override
+        public Roles[] getViewableRoles() {
+            return new Roles[]{Roles.MASON1, Roles.MASON2};
+        }
+    }};}
 }

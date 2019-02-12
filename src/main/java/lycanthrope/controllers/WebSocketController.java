@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Controller
 public class WebSocketController {
@@ -219,6 +220,27 @@ public class WebSocketController {
         return performNightAction(optionalUser.get(), webSocketRequestMessage.getValue(), optionalUser.get().getPlayer().getRoleId());
     }
 
+    // @SendToUser(value = "/endpoint/private")
+    @MessageMapping("/voteAction")
+    @SendTo(value = "/endpoint/broadcast")
+    public WebSocketResponseMessage<String> voteAction(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        if (webSocketRequestMessage.getValue() == null || webSocketRequestMessage.getValue().length() < 1) {
+            throw new Exception("Could not understand performed action");
+        }
+
+        return performVoteAction(optionalUser.get(), webSocketRequestMessage.getValue());
+    }
+
     private WebSocketResponseMessage errorResponse(String message) {
         logger.warn(message);
 
@@ -303,6 +325,55 @@ public class WebSocketController {
         // throw new Exception("Something went wrong");
     }
 
+    private WebSocketResponseMessage<String> performVoteAction(User user, String messageValue) throws Exception {
+        int targetUserId = Integer.parseInt(messageValue.substring(1));
+
+        Optional<User> optionalTargetUser = userService.findById(targetUserId);
+        if (!optionalTargetUser.isPresent()) {
+            throw new Exception("Could not find a user with the given target id");
+        }
+
+        if (user.getLobby().getId() != optionalTargetUser.get().getLobby().getId()) {
+            throw new Exception("Someone tried to vote for a user that isn't in their lobby");
+        }
+
+        PlayerVoteAction playerVoteAction = new PlayerVoteAction();
+
+        if (user.getPlayer().getVote() != null && user.getPlayer().getVote().length() > 0) {
+            int previousVoteUserId = Integer.parseInt(user.getPlayer().getVote().substring(1));
+            Optional<User> optionalPreviousVoteUser = userService.findById(previousVoteUserId);
+
+            playerVoteAction.setPreviousVote(user.getPlayer().getVote());
+            optionalPreviousVoteUser.get().getPlayer().setVotesAgainstPlayer(optionalPreviousVoteUser.get().getPlayer().getVotesAgainstPlayer() - 1);
+            playerService.save(optionalPreviousVoteUser.get().getPlayer());
+            playerVoteAction.setPreviousVotes(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer());
+        }
+
+        if (user.getPlayer().getVote() != null && user.getPlayer().getVote().length() > 0 && user.getPlayer().getVote().equals(messageValue)) {
+            user.getPlayer().setVote(null);
+            optionalTargetUser.get().getPlayer().setVotesAgainstPlayer(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer() - 1);
+            playerVoteAction.setVoteIndicator("-");
+        } else {
+            user.getPlayer().setVote(messageValue);
+            optionalTargetUser.get().getPlayer().setVotesAgainstPlayer(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer() + 1);
+            playerVoteAction.setVoteIndicator("+");
+        }
+
+        userService.save(user);
+        playerService.save(optionalTargetUser.get().getPlayer());
+
+        playerVoteAction.setVoter(user.getNickname());
+        playerVoteAction.setVotedFor("u" + optionalTargetUser.get().getId());
+        playerVoteAction.setVotes(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer());
+
+        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        webSocketResponseMessage.setAction("updateVotes");
+        webSocketResponseMessage.setContent(playerVoteAction);
+        webSocketResponseMessage.setStatus(200);
+
+        return webSocketResponseMessage;
+    }
+
     private WebSocketResponseMessage<String> performTroublemakerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
         if (actionsPerformed == 1) {
             user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
@@ -357,7 +428,7 @@ public class WebSocketController {
             switch (targetNeutralId) {
                 case 1:
                     map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralOne()).getName());
-                break;
+                    break;
                 case 2:
                     map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralTwo()).getName());
                     break;

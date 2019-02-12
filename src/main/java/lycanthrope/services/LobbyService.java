@@ -130,7 +130,7 @@ public class LobbyService {
                 int lobbyId = lobby.getId();
                 taskScheduler.schedule(() -> {
                     scheduleRoleReveal(lobbyId);
-                }, new Date(System.currentTimeMillis() + 5000)); // Used to be 30000
+                }, new Date(System.currentTimeMillis() + 7000)); // Used to be 30000
             }
 
             return Optional.of(lobby);
@@ -165,7 +165,7 @@ public class LobbyService {
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
         taskScheduler.schedule(() -> {
             scheduleNightAction(lobbyId);
-        }, new Date(System.currentTimeMillis() + 10000)); // Used to be 20000
+        }, new Date(System.currentTimeMillis() + 5000)); // Used to be 20000
     }
 
     private void scheduleNightAction(int lobbyId) {
@@ -177,6 +177,7 @@ public class LobbyService {
         optionalLobby.get().setState(4);
         save(optionalLobby.get());
 
+        // User doppelganger = null;
         User drunk = null;
         User troublemaker = null;
         User robber = null;
@@ -192,8 +193,9 @@ public class LobbyService {
         }
 
         if (robber != null) {
-            try {
-                if (robber.getPlayer().getNightActionTarget() != null) {
+            if (robber.getPlayer().getNightActionTarget() != null && robber.getPlayer().getNightActionTarget().length() > 0) {
+                try {
+
                     int robberTarget = Integer.parseInt(robber.getPlayer().getNightActionTarget().substring(1));
 
                     Optional<User> optionalRobberTargetUser = userService.findById(robberTarget);
@@ -207,14 +209,42 @@ public class LobbyService {
                         optionalRobberTargetUser.get().getPlayer().setRoleId(robberOldRole);
                         userService.save(optionalRobberTargetUser.get());
                     }
+
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                 }
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
             }
         }
 
         if (troublemaker != null) {
-            // TODO: implement
+            Integer troublemakerTargetOne = null;
+            Integer troublemakerTargetTwo = null;
+            try {
+                if (troublemaker.getPlayer().getNightActionTarget() != null && troublemaker.getPlayer().getNightActionTarget().length() > 0) {
+                    troublemakerTargetOne = Integer.parseInt(troublemaker.getPlayer().getNightActionTarget().substring(1));
+                }
+                if (troublemaker.getPlayer().getNightActionTargetTwo() != null && troublemaker.getPlayer().getNightActionTargetTwo().length() > 0) {
+                    troublemakerTargetTwo = Integer.parseInt(troublemaker.getPlayer().getNightActionTargetTwo().substring(1));
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+
+            if (troublemakerTargetOne != null && troublemakerTargetTwo != null) {
+                Optional<User> optionalTroublemakerTargetUserOne = userService.findById(troublemakerTargetOne);
+                Optional<User> optionalTroublemakerTargetUserTwo = userService.findById(troublemakerTargetTwo);
+
+                if (optionalTroublemakerTargetUserOne.isPresent() && optionalTroublemakerTargetUserTwo.isPresent()) {
+                    int targetOneRole = optionalTroublemakerTargetUserOne.get().getPlayer().getRoleId();
+                    int targetTwoRole = optionalTroublemakerTargetUserTwo.get().getPlayer().getRoleId();
+
+                    optionalTroublemakerTargetUserOne.get().getPlayer().setRoleId(targetTwoRole);
+                    optionalTroublemakerTargetUserTwo.get().getPlayer().setRoleId(targetOneRole);
+
+                    userService.save(optionalTroublemakerTargetUserOne.get());
+                    userService.save(optionalTroublemakerTargetUserTwo.get());
+                }
+            }
         }
 
         if (drunk != null) {
@@ -262,15 +292,30 @@ public class LobbyService {
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
 
-        taskScheduler.schedule(() -> {
-            scheduleVoteAction(lobbyId);
-        }, new Date(System.currentTimeMillis() + 100000));
+        taskScheduler.schedule(
+                () -> scheduleVoteAction(lobbyId),
+                new Date(System.currentTimeMillis() + 3000) // Used to be 100000
+        );
     }
 
     private void scheduleVoteAction(int lobbyId) {
         WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setStatus(200);
         webSocketResponseMessage.setAction("requestVoteAction");
+        webSocketResponseMessage.setContent("");
+
+        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+
+        taskScheduler.schedule(
+                () -> scheduleGameEnd(lobbyId),
+                new Date(System.currentTimeMillis() + 10000)
+        );
+    }
+
+    private void scheduleGameEnd(int lobbyId) {
+        WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
+        webSocketResponseMessage.setStatus(200);
+        webSocketResponseMessage.setAction("requestGameEndAction");
         webSocketResponseMessage.setContent("");
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);

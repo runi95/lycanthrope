@@ -139,4 +139,23 @@ public class GameController {
     public String getVote() {
         return "gameVote";
     }
+
+    @GetMapping("/voteAction")
+    public String getVoteAction(Principal principal, Model model) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        model.addAttribute("lobby", optionalUser.get().getLobby());
+        model.addAttribute("userid", optionalUser.get().getId());
+        model.addAttribute("vote", optionalUser.get().getPlayer().getVote());
+
+        return "gameVote";
+    }
 }

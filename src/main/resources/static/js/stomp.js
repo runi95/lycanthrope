@@ -96,3 +96,7 @@ function createLobby(data) {
 function nightAction(id) {
     stompClient.send("/websock/nightAction", {}, JSON.stringify({"action": "nightaction", "value": id}));
 }
+
+function voteAction(id) {
+    stompClient.send("/websock/voteAction", {}, JSON.stringify({"action": "voteaction", "value": id}));
+}

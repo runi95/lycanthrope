@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
@@ -17,6 +19,10 @@ public class Player {
     @JoinColumn
     @JsonBackReference
     private User user;
+
+    private int votesAgainstPlayer;
+
+    private String vote;
 
     @JsonIgnore
     private int roleId;
@@ -42,6 +48,12 @@ public class Player {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    public int getVotesAgainstPlayer() { return votesAgainstPlayer; }
+    public void setVotesAgainstPlayer(int votesAgainstPlayer) { this.votesAgainstPlayer = votesAgainstPlayer; }
+
+    public String getVote() { return vote; }
+    public void setVote(String vote) { this.vote = vote; }
 
     public int getActionsPerformed() { return actionsPerformed; }
     public void setActionsPerformed(int actionsPerformed) { this.actionsPerformed = actionsPerformed; }

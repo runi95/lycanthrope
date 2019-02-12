@@ -21,6 +21,9 @@ function handleActions(message) {
             console.log("createLobby");
             populateNewLobby(message.content);
             break;
+        case "updateVotes":
+            updateVotes(message.content);
+            break;
         case "loadlobby":
             loadLobby(message.content);
             break;
@@ -32,6 +35,9 @@ function handleActions(message) {
             break;
         case "requestGame":
             getGame();
+            break;
+        case "requestVoteAction":
+            getVoteAction();
             break;
     }
 }
@@ -125,6 +131,38 @@ function loadLobby(message) {
                 }
             }
         }
+    }
+}
+
+function updateVotes(vote) {
+    if ($("meta[name=nickname]").attr("content") === vote.voter) {
+        if (vote.previousVote) {
+            var previousVotedPlayer = document.getElementById(vote.previousVote);
+            if (previousVotedPlayer) {
+                previousVotedPlayer.setAttribute("class", "btn btn-block btn-primary");
+            }
+        }
+
+        if (vote.voteIndicator === "+") {
+            var votedPlayer = document.getElementById(vote.votedFor);
+            if (votedPlayer) {
+                votedPlayer.setAttribute("class", "btn btn-block btn-outline-secondary");
+            } else {
+                console.warn("Could not find votedPlayer(", votedPlayer, ")");
+            }
+        }
+    }
+
+    if (vote.previousVote) {
+        var previousVoteCount = document.getElementById("b" + vote.previousVote);
+        if (previousVoteCount) {
+            previousVoteCount.replaceChild(document.createTextNode(vote.previousVotes), previousVoteCount.childNodes[0]);
+        }
+    }
+
+    var votedPlayerCount = document.getElementById("b" + vote.votedFor);
+    if (votedPlayerCount) {
+        votedPlayerCount.replaceChild(document.createTextNode(vote.votes), votedPlayerCount.childNodes[0]);
     }
 }
 
@@ -238,6 +276,19 @@ function getNightAction() {
 function getGame() {
     $.ajax({
         url: "/game",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function getVoteAction() {
+    $.ajax({
+        url: "/voteAction",
         type: "GET",
         success: function (result) {
             changeView(result);
