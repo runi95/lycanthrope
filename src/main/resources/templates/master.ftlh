@@ -18,6 +18,8 @@
     <link rel="stylesheet"
           href="/webjars/bootstrap/4.1.0/css/bootstrap.min.css" async/>
     <link rel="stylesheet"
+          href="/webjars/font-awesome/5.7.1/css/all.css" async>
+    <link rel="stylesheet"
           href="/css/master.css" async/>
 </head>
 <body>
