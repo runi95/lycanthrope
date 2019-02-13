@@ -36,6 +36,9 @@ public class Player {
     @JsonIgnore
     private String nightActionTargetTwo;
 
+    @JsonIgnore
+    private String dayAction;
+
     /*
     @JsonIgnore
     private Long doppelgangerTargetId;
@@ -63,6 +66,9 @@ public class Player {
 
     public String getNightActionTargetTwo() { return nightActionTargetTwo; }
     public void setNightActionTargetTwo(String nightActionTargetTwo) { this.nightActionTargetTwo = nightActionTargetTwo; }
+
+    public String getDayAction() { return dayAction; }
+    public void setDayAction(String dayAction) { this.dayAction = dayAction; }
 
     /*
     public Long getDoppelgangerTargetId() { return doppelgangerTargetId; }

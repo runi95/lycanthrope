@@ -6,6 +6,13 @@ public class Pair<K, V> {
 
     private V val;
 
+    public Pair() {}
+
+    public Pair(K key, V val) {
+        this.key = key;
+        this.val = val;
+    }
+
     public K getKey() {
         return key;
     }

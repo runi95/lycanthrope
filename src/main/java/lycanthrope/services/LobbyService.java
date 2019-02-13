@@ -1,5 +1,8 @@
 package lycanthrope.services;
 
+import lycanthrope.models.roles.Hunter;
+import lycanthrope.models.roles.Tanner;
+import lycanthrope.models.roles.Werewolf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import lycanthrope.models.*;
 import lycanthrope.repositories.LobbyRepository;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
@@ -30,6 +34,15 @@ public class LobbyService {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private PlayerRoleService playerRoleService;
+
+    @Autowired
+    private GameResultService gameResultService;
+
+    @Autowired
+    private GameResultPlayerService gameResultPlayerService;
 
     private Random random = new Random();
 
@@ -195,7 +208,6 @@ public class LobbyService {
         if (robber != null) {
             if (robber.getPlayer().getNightActionTarget() != null && robber.getPlayer().getNightActionTarget().length() > 0) {
                 try {
-
                     int robberTarget = Integer.parseInt(robber.getPlayer().getNightActionTarget().substring(1));
 
                     Optional<User> optionalRobberTargetUser = userService.findById(robberTarget);
@@ -209,7 +221,6 @@ public class LobbyService {
                         optionalRobberTargetUser.get().getPlayer().setRoleId(robberOldRole);
                         userService.save(optionalRobberTargetUser.get());
                     }
-
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -313,10 +324,147 @@ public class LobbyService {
     }
 
     private void scheduleGameEnd(int lobbyId) {
+        // The people with the most votes gets lynched at the end of the game
+        // If nobody has more than 1 votes then nobody dies (this means that town wins if none of the players were werewolves, otherwise werewolves win)
+        // If there's a tie then all the players with the tied votes (above 1) will die and if a werewolf dies then town wins
+
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (!optionalLobby.isPresent()) {
+            System.out.println("Could not find any lobbies with the given id " + lobbyId);
+
+            return;
+        }
+
+        ArrayList<String> lynchedPlayerVotes = new ArrayList<>();
+        int highestVoteCount = 0;
+
+        Map<String, Integer> playerMap = new HashMap<>();
+
+        boolean isAWerewolfInPlay = false;
+        for(User user : optionalLobby.get().getUsers()) {
+            if (playerRoleService.getRole(user.getPlayer().getRoleId()) instanceof Werewolf) {
+                isAWerewolfInPlay = true;
+            }
+
+            String vote = user.getPlayer().getVote();
+            if (vote != null && vote.length() > 0) {
+                if (playerMap.containsKey(vote)) {
+                    int newVoteCount = playerMap.get(vote) + 1;
+                    if (newVoteCount > 1) {
+                        if (newVoteCount > highestVoteCount) {
+                            lynchedPlayerVotes.clear();
+                            lynchedPlayerVotes.add(vote);
+                            highestVoteCount = newVoteCount;
+                        } else if (newVoteCount == highestVoteCount) {
+                            lynchedPlayerVotes.add(vote);
+                        }
+                    }
+
+                    playerMap.put(vote, newVoteCount);
+                } else {
+                    playerMap.put(vote, 1);
+                }
+            }
+        }
+
+        boolean isAWerewolfDead = false;
+        boolean isTannerDead = false;
+        boolean isHunterDead = false;
+        String deadHunterId = null;
+        for(String s : lynchedPlayerVotes) {
+            if (s.length() > 1) {
+                Integer userId = null;
+
+                try {
+                    userId = Integer.parseInt(s.substring(1));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                if (userId != null && userId > 0) {
+                    Optional<User> optionalUser = userService.findById(userId);
+                    if (optionalUser.isPresent()) {
+                        PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+                        if (playerRole instanceof Werewolf) {
+                            isAWerewolfDead = true;
+                        } else if (playerRole instanceof Tanner) {
+                            isTannerDead = true;
+                        } else if (playerRole instanceof Hunter) {
+                            deadHunterId = Long.toString(optionalUser.get().getPlayer().getUser().getId());
+                            isHunterDead = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (isHunterDead) {
+            WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
+            webSocketResponseMessage.setStatus(200);
+            webSocketResponseMessage.setAction("requestHunterKill");
+            webSocketResponseMessage.setContent("");
+
+            simpTemplate.convertAndSendToUser(deadHunterId,"/endpoint/private", webSocketResponseMessage);
+
+            final boolean isAWerewolfDeadFinal = isAWerewolfDead;
+            final boolean isAWerewolfInPlayFinal = isAWerewolfInPlay;
+            final boolean isTannerDeadFinal = isTannerDead;
+
+            taskScheduler.schedule(
+                    () -> endGame(isAWerewolfDeadFinal, isAWerewolfInPlayFinal, isTannerDeadFinal, lynchedPlayerVotes, optionalLobby.get().getUsers()),
+                    new Date(System.currentTimeMillis() + 10000)
+            );
+        } else {
+            endGame(isAWerewolfDead, isAWerewolfInPlay, isTannerDead, lynchedPlayerVotes, optionalLobby.get().getUsers());
+        }
+    }
+
+    private void endGame(boolean isAWerewolfDead, boolean isAWerewolfInPlay, boolean isTannerDead, ArrayList<String> lynchedPlayerVotes, List<User> users) {
+        Team winnerTeam = null;
+
+        if (isAWerewolfDead) {
+            System.out.println("Case A");
+            winnerTeam = Team.Village;
+        } else if (!isAWerewolfInPlay && lynchedPlayerVotes.size() == 0) {
+            System.out.println("Case B");
+            winnerTeam = Team.Village;
+        } else if (isAWerewolfInPlay && !isTannerDead) {
+            System.out.println("Case C");
+            winnerTeam = Team.Werewolf;
+        } else if (isTannerDead) {
+            System.out.println("Case D");
+            winnerTeam = Team.Tanner;
+        }
+
+        GameResult gameResult = new GameResult();
+        gameResult.setGameEndTime(LocalDateTime.now());
+
+        for(User user : users) {
+            PlayerRole playerRole = playerRoleService.getRole(user.getPlayer().getRoleId());
+            boolean isDead = false;
+            String playerVoteId = "u" + user.getId();
+
+            for (String s : lynchedPlayerVotes) {
+                if (s.equals(playerVoteId)) {
+                    isDead = true;
+                }
+            }
+
+            GameResultPlayer gameResultPlayer = new GameResultPlayer();
+            gameResultPlayer.setNickname(user.getNickname());
+            gameResultPlayer.setRole(playerRole.getName());
+            gameResultPlayer.setWinner(playerRole.getTeam() == winnerTeam || (playerRole instanceof Tanner && isDead));
+            gameResultPlayer.setDead(isDead);
+
+            gameResult.addGameResultPlayer(gameResultPlayer);
+        }
+
+        gameResultService.save(gameResult);
+
         WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setStatus(200);
         webSocketResponseMessage.setAction("requestGameEndAction");
-        webSocketResponseMessage.setContent("");
+        webSocketResponseMessage.setContent(Long.toString(gameResult.getId()));
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
     }

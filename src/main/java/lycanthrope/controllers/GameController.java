@@ -1,19 +1,16 @@
 package lycanthrope.controllers;
 
-import lycanthrope.models.NightAction;
-import lycanthrope.models.Roles;
-import lycanthrope.models.User;
-import lycanthrope.services.PlayerRoleService;
+import lycanthrope.models.*;
+import lycanthrope.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import lycanthrope.services.LobbyService;
-import lycanthrope.services.UserService;
 
 import java.security.Principal;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Controller
 public class GameController {
@@ -26,6 +23,12 @@ public class GameController {
 
     @Autowired
     private PlayerRoleService playerRoleService;
+
+    @Autowired
+    private GameResultService gameResultService;
+
+    @Autowired
+    private GameResultPlayerService gameResultPlayerService;
 
     @GetMapping("/game")
     public String getGame(Model model, Principal principal) throws Exception {
@@ -135,9 +138,75 @@ public class GameController {
         return "gameNightAction";
     }
 
-    @GetMapping("/vote")
-    public String getVote() {
-        return "gameVote";
+    @GetMapping("/result/{gameResultId}")
+    public String getVote(@PathVariable("gameResultId") Long gameResultId, Principal principal, Model model) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        if (gameResultId == null || gameResultId < 1) {
+            throw new Exception("Invalid gameResultId");
+        }
+
+        Optional<GameResult> optionalGameResult = gameResultService.find(gameResultId);
+        if (!optionalGameResult.isPresent()) {
+            throw new Exception("Could not find a game result with the given id");
+        }
+
+        model.addAttribute("gameresult", optionalGameResult.get());
+
+        /*
+        Set<GameResultPlayer> gameResultPlayers = new HashSet<>();
+        GameResultPlayer one = new GameResultPlayer();
+        one.setId(1);
+        one.setDead(true);
+        one.setNickname("Night Twister");
+        one.setRole("WEREWOLF");
+        one.setWinner(false);
+
+        GameResultPlayer two = new GameResultPlayer();
+        two.setDead(false);
+        two.setNickname("Promises");
+        two.setRole("HUNTER");
+        two.setWinner(true);
+        two.setId(2);
+
+        GameResultPlayer three = new GameResultPlayer();
+        three.setDead(false);
+        three.setNickname("C2H60");
+        three.setRole("INSOMNIAC");
+        three.setWinner(true);
+        three.setId(3);
+
+        GameResultPlayer four = new GameResultPlayer();
+        four.setDead(false);
+        four.setNickname("Janne");
+        four.setRole("DRUNK");
+        four.setWinner(true);
+        four.setId(4);
+
+        GameResultPlayer five = new GameResultPlayer();
+        five.setDead(false);
+        five.setNickname("Bokki");
+        five.setRole("MINION");
+        five.setWinner(false);
+        five.setId(5);
+
+        gameResultPlayers.add(one);
+        gameResultPlayers.add(two);
+        gameResultPlayers.add(three);
+        gameResultPlayers.add(four);
+        gameResultPlayers.add(five);
+
+        GameResult gameResult = new GameResult();
+        gameResult.setGameEndTime(LocalDateTime.now());
+        gameResult.setGameResultPlayers(gameResultPlayers);
+
+        model.addAttribute("gameresult", gameResult);
+        */
+
+        return "gameEnd";
     }
 
     @GetMapping("/voteAction")
