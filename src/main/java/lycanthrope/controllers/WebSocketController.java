@@ -524,6 +524,7 @@ public class WebSocketController {
                 break;
         }
 
+        // TODO: This should log a warning and then return something useful instead of throwing an exception
         if (roleId == null) {
             throw new Exception("performWerewolfAction somehow got a null roleId");
         }
