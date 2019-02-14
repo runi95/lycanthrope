@@ -10,13 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Controller
 public class GameController {
-
-    @Autowired
-    private LobbyService lobbyService;
 
     @Autowired
     private UserService userService;
@@ -27,8 +25,7 @@ public class GameController {
     @Autowired
     private GameResultService gameResultService;
 
-    @Autowired
-    private GameResultPlayerService gameResultPlayerService;
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @GetMapping("/game")
     public String getGame(Model model, Principal principal) throws Exception {
@@ -154,7 +151,10 @@ public class GameController {
             throw new Exception("Could not find a game result with the given id");
         }
 
+        String gameEndTime = optionalGameResult.get().getGameEndTime().format(dateTimeFormatter);
+
         model.addAttribute("gameresult", optionalGameResult.get());
+        model.addAttribute("gameEndTime", gameEndTime);
 
         return "gameEnd";
     }

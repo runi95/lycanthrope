@@ -2,9 +2,14 @@
 <@m.master>
     <div class="container">
         <div class="row">
+            <div style="position: relative; width: 100%;">
+                <small class="text-secondary text-center" style="width: 100%; position: fixed; bottom: 5px;">${gameEndTime}</small>
+            </div>
             <div class="col-sm-12">
                 <div class="text-center margin-top">
-                    <h1>Result</h1>
+                    <h1>
+                        Result
+                    </h1>
                     <hr>
                     <#list gameresult.gameResultPlayers as playerGameResult>
                         <div>
@@ -17,7 +22,7 @@
     </div>
     <style>
         .margin-top {
-            margin-top: 10px;
+            margin-top: 16px;
         }
 
         .text-middle {
