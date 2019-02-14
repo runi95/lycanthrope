@@ -498,11 +498,40 @@ public class WebSocketController {
             throw new Exception("You have already performed all your actions");
         }
 
+        if (!user.getLobby().isLoneWolf()) {
+            throw new Exception("You can only perform this action if you're the lone wolf!");
+        }
+
+        if (messageValue == null || messageValue.length() < 2) {
+            throw new Exception("Night action targets can't be less than 2 characters in length");
+        }
+
         user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
         user.getPlayer().setNightActionTarget(messageValue);
         playerService.save(user.getPlayer());
 
-        return parseTemplate("gameNightAction", null);
+        Integer roleId = null;
+
+        switch(messageValue.substring(1)) {
+            case "1":
+                roleId = user.getLobby().getNeutralOne();
+                break;
+            case "2":
+                roleId = user.getLobby().getNeutralTwo();
+                break;
+            case "3":
+                roleId = user.getLobby().getNeutralThree();
+                break;
+        }
+
+        if (roleId == null) {
+            throw new Exception("performWerewolfAction somehow got a null roleId");
+        }
+
+        Map map = new HashMap();
+        map.put("viewRole", playerRoleService.getRole(roleId).getName());
+
+        return parseTemplate("gameNightAction", map);
     }
 
     /*
