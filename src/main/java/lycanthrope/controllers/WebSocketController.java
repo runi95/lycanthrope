@@ -311,7 +311,6 @@ public class WebSocketController {
                     return performDoppelgangerAction(user, targetNeutralId, user.getPlayer().getActionsPerformed(), messageValue);
                 */
                 case 14: // Werewolf 1
-                    return performWerewolfAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 case 15: // Werewolf 2
                     return performWerewolfAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 default: // Something went wrong
