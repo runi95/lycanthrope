@@ -423,16 +423,12 @@ public class LobbyService {
         Team winnerTeam = null;
 
         if (isAWerewolfDead) {
-            System.out.println("Case A");
             winnerTeam = Team.Village;
         } else if (!isAWerewolfInPlay && lynchedPlayerVotes.size() == 0) {
-            System.out.println("Case B");
             winnerTeam = Team.Village;
         } else if (isAWerewolfInPlay && !isTannerDead) {
-            System.out.println("Case C");
             winnerTeam = Team.Werewolf;
         } else if (isTannerDead) {
-            System.out.println("Case D");
             winnerTeam = Team.Tanner;
         }
 
