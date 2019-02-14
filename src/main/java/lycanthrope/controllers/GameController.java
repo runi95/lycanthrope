@@ -156,56 +156,6 @@ public class GameController {
 
         model.addAttribute("gameresult", optionalGameResult.get());
 
-        /*
-        Set<GameResultPlayer> gameResultPlayers = new HashSet<>();
-        GameResultPlayer one = new GameResultPlayer();
-        one.setId(1);
-        one.setDead(true);
-        one.setNickname("Night Twister");
-        one.setRole("WEREWOLF");
-        one.setWinner(false);
-
-        GameResultPlayer two = new GameResultPlayer();
-        two.setDead(false);
-        two.setNickname("Promises");
-        two.setRole("HUNTER");
-        two.setWinner(true);
-        two.setId(2);
-
-        GameResultPlayer three = new GameResultPlayer();
-        three.setDead(false);
-        three.setNickname("C2H60");
-        three.setRole("INSOMNIAC");
-        three.setWinner(true);
-        three.setId(3);
-
-        GameResultPlayer four = new GameResultPlayer();
-        four.setDead(false);
-        four.setNickname("Janne");
-        four.setRole("DRUNK");
-        four.setWinner(true);
-        four.setId(4);
-
-        GameResultPlayer five = new GameResultPlayer();
-        five.setDead(false);
-        five.setNickname("Bokki");
-        five.setRole("MINION");
-        five.setWinner(false);
-        five.setId(5);
-
-        gameResultPlayers.add(one);
-        gameResultPlayers.add(two);
-        gameResultPlayers.add(three);
-        gameResultPlayers.add(four);
-        gameResultPlayers.add(five);
-
-        GameResult gameResult = new GameResult();
-        gameResult.setGameEndTime(LocalDateTime.now());
-        gameResult.setGameResultPlayers(gameResultPlayers);
-
-        model.addAttribute("gameresult", gameResult);
-        */
-
         return "gameEnd";
     }
 
