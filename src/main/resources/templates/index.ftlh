@@ -3,11 +3,14 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
-            <div class="text-center">
+            <br>
+            <div class="text-center animate-top">
+                <small>Welcome to...</small>
                 <h1>
                     Lycanthrope
                 </h1>
             </div>
+            <br>
             <div class="col-sm-12">
                 <div class="login-box">
                     <form id="loginForm" name="loginForm" action="/setNick" method="POST">
