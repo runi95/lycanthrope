@@ -39,6 +39,9 @@ function handleActions(message) {
         case "requestVoteAction":
             getVoteAction();
             break;
+        case "requestGameEndAction":
+            getGameResult(message.content);
+            break;
     }
 }
 
@@ -289,6 +292,19 @@ function getGame() {
 function getVoteAction() {
     $.ajax({
         url: "/voteAction",
+        type: "GET",
+        success: function (result) {
+            changeView(result);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+function getGameResult(gameResultId) {
+    $.ajax({
+        url: "/result/" + gameResultId,
         type: "GET",
         success: function (result) {
             changeView(result);
