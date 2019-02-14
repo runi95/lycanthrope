@@ -1,7 +1,11 @@
 package lycanthrope.controllers;
 
-import lycanthrope.models.*;
-import lycanthrope.services.*;
+import lycanthrope.models.GameResult;
+import lycanthrope.models.NightAction;
+import lycanthrope.models.User;
+import lycanthrope.services.GameResultService;
+import lycanthrope.services.PlayerRoleService;
+import lycanthrope.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,9 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Optional;
 
 @Controller
 public class GameController {
