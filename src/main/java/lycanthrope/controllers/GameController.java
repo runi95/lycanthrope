@@ -2,7 +2,9 @@ package lycanthrope.controllers;
 
 import lycanthrope.models.GameResult;
 import lycanthrope.models.NightAction;
+import lycanthrope.models.PlayerRole;
 import lycanthrope.models.User;
+import lycanthrope.models.roles.Insomniac;
 import lycanthrope.services.GameResultService;
 import lycanthrope.services.PlayerRoleService;
 import lycanthrope.services.UserService;
@@ -32,6 +34,21 @@ public class GameController {
 
     @GetMapping("/game")
     public String getGame(Model model, Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        if (optionalUser.get().getPlayer().isRealInsomniac()) {
+            PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+            model.addAttribute("secretMessage", "You wake up as the " + playerRole.getName());
+        }
+
         return "game";
     }
 

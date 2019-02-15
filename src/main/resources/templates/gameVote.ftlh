@@ -15,17 +15,23 @@
                     <#list lobby.users as user>
                         <#if user.id != userid>
                             <#if vote?? && "u${user.id}" == vote>
-                                <button id="u${user.id}" class="btn btn-block btn-secondary" onclick="performVoteAction(this)">${user.nickname} <span
-                                            id="bu${user.id}" class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
+                                <button id="u${user.id}" class="btn btn-block btn-secondary"
+                                        onclick="performVoteAction(this)">${user.nickname} <span
+                                            id="bu${user.id}"
+                                            class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
                                 </button>
                             <#else>
-                                <button id="u${user.id}" class="btn btn-block btn-primary" onclick="performVoteAction(this)">${user.nickname} <span
-                                            id="bu${user.id}" class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
+                                <button id="u${user.id}" class="btn btn-block btn-primary"
+                                        onclick="performVoteAction(this)">${user.nickname} <span
+                                            id="bu${user.id}"
+                                            class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
                                 </button>
                             </#if>
                         <#else>
-                            <button id="u${user.id}" class="btn btn-block btn-outline-secondary" disabled>${user.nickname} <span
-                                        id="bu${user.id}" class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
+                            <button id="u${user.id}" class="btn btn-block btn-outline-secondary"
+                                    disabled>${user.nickname} <span
+                                        id="bu${user.id}"
+                                        class="badge badge-pill badge-light">${user.player.votesAgainstPlayer}</span>
                             </button>
                         </#if>
                     </#list>

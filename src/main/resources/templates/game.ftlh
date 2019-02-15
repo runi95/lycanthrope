@@ -1,73 +1,92 @@
 <#import "master.ftlh" as m>
 <@m.master>
-<div class="container">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="margin-top text-center">
-                <h3>Discussion Time</h3>
-                <div class="progress" style="height: 1px;">
-                    <div id="progressbar" class="progress-bar" role="progressbar" style="width: 100%;"
-                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="margin-top text-center">
+                    <h3>Discussion Time</h3>
+                    <div class="progress" style="height: 1px;">
+                        <div id="progressbar" class="progress-bar" role="progressbar" style="width: 100%;"
+                             aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
-            </div>
-            <br>
-            <div class="margin-top text-center">
-                <div id="votecountContainer" style="display: none;">
-                    <small>Vote in...</small>
-                    <h1 id="votecount" class="text-danger"></h1>
+                <#if secretMessage ??>
+                    <div id="secretmsg">
+                        <br>
+                        <div class="text-center" style="background: black; padding: 20px; width: 100%; max-width: 300px; margin: auto; word-break: break-word;"
+                             onclick="hideSecretMessage()">
+                            <h4 class="text-info">
+                                ${secretMessage}
+                            </h4>
+                            <small class="text-secondary">Click to hide message</small>
+                        </div>
+                    </div>
+                </#if>
+                <br>
+                <div class="margin-top text-center">
+                    <div id="votecountContainer" style="display: none;">
+                        <small>Vote in...</small>
+                        <h1 id="votecount" class="text-danger"></h1>
+                    </div>
+                    <small id="discusshint">
+                        Discuss until the timer runs out...
+                    </small>
                 </div>
-                <small id="discusshint">
-                    Discuss until the timer runs out...
-                </small>
             </div>
         </div>
     </div>
-</div>
-<style>
-    .margin-top {
-        margin-top: 10px;
-    }
-</style>
-<script>
-    var progress = 100;
-    var startTime = 10 * 60;
-    var timeLeft = 600;
-    var countdownTimerShown = false;
-    var firstVibration = false;
-    var intervalTimer = setInterval(updateProgressBar, 1000);
-
-    function updateProgressBar() {
-        // console.log("timeLeft: ", timeLeft);
-        timeLeft--;
-
-        if (timeLeft <= 0) {
-            clearInterval(intervalTimer);
+    <style>
+        .margin-top {
+            margin-top: 10px;
         }
+    </style>
+    <script>
+        var progress = 100;
+        var startTime = 10 * 60;
+        var timeLeft = 600;
+        var countdownTimerShown = false;
+        var firstVibration = false;
+        var intervalTimer = setInterval(updateProgressBar, 1000);
 
-        if (timeLeft <= 10 && !firstVibration) {
-            firstVibration = true;
-            window.navigator.vibrate(200);
-        }
+        function updateProgressBar() {
+            // console.log("timeLeft: ", timeLeft);
+            timeLeft--;
 
-        if (timeLeft <= 60) {
-            if (!countdownTimerShown) {
-                countdownTimerShown = true;
-                document.getElementById("votecountContainer").setAttribute("style", "");
-                document.getElementById("discusshint").setAttribute("style", "display: none");
-                document.getElementById("votecount").innerText = timeLeft;
-            } else {
-                document.getElementById("votecount").innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(intervalTimer);
+            }
+
+            if (timeLeft <= 10 && !firstVibration) {
+                firstVibration = true;
+                window.navigator.vibrate(200);
+            }
+
+            if (timeLeft <= 60) {
+                if (!countdownTimerShown) {
+                    countdownTimerShown = true;
+                    document.getElementById("votecountContainer").setAttribute("style", "");
+                    document.getElementById("discusshint").setAttribute("style", "display: none");
+                    document.getElementById("votecount").innerText = timeLeft;
+                } else {
+                    document.getElementById("votecount").innerText = timeLeft;
+                }
+            }
+
+            var progressMade = 100 * (timeLeft / startTime);
+            if (progress > progressMade) {
+                progress = progressMade;
+
+                var elem = document.getElementById("progressbar");
+                elem.setAttribute("style", "width: " + progress + "%;");
+                elem.setAttribute("aria-valuenow", progress);
             }
         }
 
-        var progressMade = 100 * (timeLeft / startTime);
-        if (progress > progressMade) {
-            progress = progressMade;
-
-            var elem = document.getElementById("progressbar");
-            elem.setAttribute("style", "width: " + progress + "%;");
-            elem.setAttribute("aria-valuenow", progress);
+        function hideSecretMessage() {
+            var elem = document.getElementById("secretmsg");
+            if (elem) {
+                elem.remove();
+            }
         }
-    }
-</script>
+    </script>
 </@m.master>

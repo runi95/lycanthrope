@@ -39,6 +39,9 @@ public class Player {
     @JsonIgnore
     private String dayAction;
 
+    @JsonIgnore
+    private boolean isRealInsomniac;
+
     /*
     @JsonIgnore
     private Long doppelgangerTargetId;
@@ -69,6 +72,9 @@ public class Player {
 
     public String getDayAction() { return dayAction; }
     public void setDayAction(String dayAction) { this.dayAction = dayAction; }
+
+    public boolean isRealInsomniac() { return isRealInsomniac; }
+    public void setRealInsomniac(boolean realInsomniac) { isRealInsomniac = realInsomniac; }
 
     /*
     public Long getDoppelgangerTargetId() { return doppelgangerTargetId; }
