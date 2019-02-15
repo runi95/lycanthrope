@@ -138,9 +138,13 @@ public class LobbyService {
                         playerService.save(player);
                     }
 
-                    lobby.setNeutralOne(iterator.next().ordinal());
-                    lobby.setNeutralTwo(iterator.next().ordinal());
-                    lobby.setNeutralThree(iterator.next().ordinal());
+                    int one = iterator.next().ordinal();
+                    int two = iterator.next().ordinal();;
+                    int three = iterator.next().ordinal();
+
+                    lobby.setNeutralOne(one);
+                    lobby.setNeutralTwo(two);
+                    lobby.setNeutralThree(three);
 
                     if (wolves == 1) {
                         lobby.setLoneWolf(true);
@@ -230,7 +234,7 @@ public class LobbyService {
         }
 
         if (robber != null) {
-            if (robber.getPlayer().getNightActionTarget() != null && robber.getPlayer().getNightActionTarget().length() > 0) {
+            if (robber.getPlayer().getNightActionTarget() != null && robber.getPlayer().getNightActionTarget().length() > 1) {
                 try {
                     int robberTargetId = Integer.parseInt(robber.getPlayer().getNightActionTarget().substring(1));
 
@@ -256,10 +260,10 @@ public class LobbyService {
             Integer troublemakerTargetOne = null;
             Integer troublemakerTargetTwo = null;
             try {
-                if (troublemaker.getPlayer().getNightActionTarget() != null && troublemaker.getPlayer().getNightActionTarget().length() > 0) {
+                if (troublemaker.getPlayer().getNightActionTarget() != null && troublemaker.getPlayer().getNightActionTarget().length() > 1) {
                     troublemakerTargetOne = Integer.parseInt(troublemaker.getPlayer().getNightActionTarget().substring(1));
                 }
-                if (troublemaker.getPlayer().getNightActionTargetTwo() != null && troublemaker.getPlayer().getNightActionTargetTwo().length() > 0) {
+                if (troublemaker.getPlayer().getNightActionTargetTwo() != null && troublemaker.getPlayer().getNightActionTargetTwo().length() > 1) {
                     troublemakerTargetTwo = Integer.parseInt(troublemaker.getPlayer().getNightActionTargetTwo().substring(1));
                 }
             } catch (NumberFormatException e) {
@@ -285,37 +289,44 @@ public class LobbyService {
 
         if (drunk != null) {
             try {
-                if (drunk.getPlayer().getNightActionTarget() != null) {
+                if (drunk.getPlayer().getNightActionTarget() != null && drunk.getPlayer().getNightActionTarget().length() > 1) {
                     int drunkTarget = Integer.parseInt(drunk.getPlayer().getNightActionTarget().substring(1));
-                    optionalLobby = lobbyRepository.findById(lobbyId);
 
-                    if (drunkTarget == 1) {
-                        int drunkNewRole = optionalLobby.get().getNeutralOne();
-                        int drunkOldRole = drunk.getPlayer().getRoleId();
+                    // TODO: Find out how you want to improve this (low priority)
+                    switch (drunkTarget) {
+                        case 1:
+                            int drunkNewRole = optionalLobby.get().getNeutralOne();
+                            int drunkOldRole = drunk.getPlayer().getRoleId();
 
-                        drunk.getPlayer().setRoleId(drunkNewRole);
-                        playerService.save(drunk.getPlayer());
+                            drunk.getPlayer().setRoleId(drunkNewRole);
+                            playerService.save(drunk.getPlayer());
 
-                        optionalLobby.get().setNeutralOne(drunkOldRole);
-                        lobbyRepository.save(optionalLobby.get());
-                    } else if (drunkTarget == 2) {
-                        int drunkNewRole = optionalLobby.get().getNeutralTwo();
-                        int drunkOldRole = drunk.getPlayer().getRoleId();
+                            optionalLobby = lobbyRepository.findById(lobbyId); // TODO: VERY UGLY CODE, FIX IT!!!
+                            optionalLobby.get().setNeutralOne(drunkOldRole);
+                            lobbyRepository.save(optionalLobby.get());
+                            break;
+                        case 2:
+                            int drunkNewRoleTwo = optionalLobby.get().getNeutralTwo();
+                            int drunkOldRoleTwo = drunk.getPlayer().getRoleId();
 
-                        drunk.getPlayer().setRoleId(drunkNewRole);
-                        playerService.save(drunk.getPlayer());
+                            drunk.getPlayer().setRoleId(drunkNewRoleTwo);
+                            playerService.save(drunk.getPlayer());
 
-                        optionalLobby.get().setNeutralTwo(drunkOldRole);
-                        lobbyRepository.save(optionalLobby.get());
-                    } else if (drunkTarget == 3) {
-                        int drunkNewRole = optionalLobby.get().getNeutralThree();
-                        int drunkOldRole = drunk.getPlayer().getRoleId();
+                            optionalLobby = lobbyRepository.findById(lobbyId); // TODO: VERY UGLY CODE, FIX IT!!!
+                            optionalLobby.get().setNeutralTwo(drunkOldRoleTwo);
+                            lobbyRepository.save(optionalLobby.get());
+                            break;
+                        case 3:
+                            int drunkNewRoleThree = optionalLobby.get().getNeutralThree();
+                            int drunkOldRoleThree = drunk.getPlayer().getRoleId();
 
-                        drunk.getPlayer().setRoleId(drunkNewRole);
-                        playerService.save(drunk.getPlayer());
+                            drunk.getPlayer().setRoleId(drunkNewRoleThree);
+                            playerService.save(drunk.getPlayer());
 
-                        optionalLobby.get().setNeutralThree(drunkOldRole);
-                        lobbyRepository.save(optionalLobby.get());
+                            optionalLobby = lobbyRepository.findById(lobbyId); // TODO: VERY UGLY CODE, FIX IT!!!
+                            optionalLobby.get().setNeutralThree(drunkOldRoleThree);
+                            lobbyRepository.save(optionalLobby.get());
+                            break;
                     }
                 }
             } catch (NumberFormatException e) {
@@ -357,7 +368,7 @@ public class LobbyService {
 
         Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
         if (!optionalLobby.isPresent()) {
-            System.out.println("Could not find any lobbies with the given id " + lobbyId);
+            logger.warn("Could not find any lobbies with the given id " + lobbyId);
 
             return;
         }
