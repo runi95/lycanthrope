@@ -97,6 +97,10 @@ function nightAction(id) {
     stompClient.send("/websock/nightAction", {}, JSON.stringify({"action": "nightaction", "value": id}));
 }
 
+function hunterKill(id) {
+    stompClient.send("/websock/hunterKill", {}, JSON.stringify({"action": "hunterkill", "value": id}));
+}
+
 function voteAction(id) {
     stompClient.send("/websock/voteAction", {}, JSON.stringify({"action": "voteaction", "value": id}));
 }

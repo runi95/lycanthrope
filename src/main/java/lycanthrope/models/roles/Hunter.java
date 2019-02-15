@@ -23,5 +23,5 @@ public class Hunter implements PlayerRole {
     }
 
     @Override
-    public NightAction[] getNightActions(Lobby lobby) { return null; }
+    public NightAction[] getNightActions(Lobby lobby) { return new NightAction[]{}; }
 }

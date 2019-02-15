@@ -54,6 +54,9 @@ public class Lobby {
     private int currentPlayerSize = 0;
 
     @JsonIgnore
+    private String hunterKill;
+
+    @JsonIgnore
     private boolean loneWolf;
 
     public int getId() { return id; }
@@ -73,6 +76,9 @@ public class Lobby {
 
     public Collection<Roles> getRoles() { return roles; }
     public void setRoles(Collection<Roles> roles) { this.roles = roles; }
+
+    public String getHunterKill() { return hunterKill; }
+    public void setHunterKill(String hunterKill) { this.hunterKill = hunterKill; }
 
     public boolean isLoneWolf() { return loneWolf; }
     public void setLoneWolf(boolean loneWolf) { this.loneWolf = loneWolf; }

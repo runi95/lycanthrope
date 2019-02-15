@@ -1,8 +1,11 @@
 package lycanthrope.services;
 
+import lycanthrope.configs.WebSocketConfig;
 import lycanthrope.models.roles.Hunter;
 import lycanthrope.models.roles.Tanner;
 import lycanthrope.models.roles.Werewolf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import lycanthrope.models.*;
 import lycanthrope.repositories.LobbyRepository;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -19,6 +23,8 @@ public class LobbyService {
 
     private final Semaphore joinLobbySemaphore = new Semaphore(1);
     private final Semaphore createLobbySemaphore = new Semaphore(1);
+
+    private Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
 
     @Autowired
     private LobbyRepository lobbyRepository;
@@ -40,6 +46,9 @@ public class LobbyService {
 
     @Autowired
     private GameResultService gameResultService;
+
+    @Autowired
+    private FreemarkerService freemarkerService;
 
     @Autowired
     private GameResultPlayerService gameResultPlayerService;
@@ -100,6 +109,7 @@ public class LobbyService {
                     Iterator<Roles> iterator = rolesArrayList.iterator();
 
                     int wolves = 0;
+                    int i = 0;
                     for (User u : lobby.getUsers()) {
                         Player player = new Player();
                         Roles roles = iterator.next();
@@ -110,6 +120,11 @@ public class LobbyService {
                         player.setRoleId(roles.ordinal());
                         player.setUser(u);
                         u.setPlayer(player);
+
+                        if (i == 0) {
+                            player.setRoleId(Roles.HUNTER.ordinal());
+                        }
+                        i++;
 
                         playerService.save(player);
                     }
@@ -371,6 +386,7 @@ public class LobbyService {
         boolean isTannerDead = false;
         boolean isHunterDead = false;
         String deadHunterId = null;
+        HashMap<Long, User> deadUsers = new HashMap<>();
         for(String s : lynchedPlayerVotes) {
             if (s.length() > 1) {
                 Integer userId = null;
@@ -385,12 +401,13 @@ public class LobbyService {
                     Optional<User> optionalUser = userService.findById(userId);
                     if (optionalUser.isPresent()) {
                         PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+                        deadUsers.put(optionalUser.get().getId(), optionalUser.get());
                         if (playerRole instanceof Werewolf) {
                             isAWerewolfDead = true;
                         } else if (playerRole instanceof Tanner) {
                             isTannerDead = true;
                         } else if (playerRole instanceof Hunter) {
-                            deadHunterId = Long.toString(optionalUser.get().getPlayer().getUser().getId());
+                            deadHunterId = optionalUser.get().getNickname();
                             isHunterDead = true;
                         }
                     }
@@ -399,27 +416,64 @@ public class LobbyService {
         }
 
         if (isHunterDead) {
-            WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
-            webSocketResponseMessage.setStatus(200);
-            webSocketResponseMessage.setAction("requestHunterKill");
-            webSocketResponseMessage.setContent("");
+            try {
+                ArrayList<User> users = new ArrayList<>();
+                optionalLobby.get().getUsers().forEach(u -> {
+                    if (!playerMap.containsKey(u.getId()))
+                        users.add(u);
+                });
 
-            simpTemplate.convertAndSendToUser(deadHunterId,"/endpoint/private", webSocketResponseMessage);
+                Map map = new HashMap();
+                map.put("users", users);
+
+                WebSocketResponseMessage<String> webSocketResponseMessage = freemarkerService.parseTemplate("hunterKill", map);
+                simpTemplate.convertAndSendToUser(deadHunterId,"/endpoint/private", webSocketResponseMessage);
+            } catch (Exception e) {
+                logger.error("Failed to parse hunterKill.ftlh!");
+            }
 
             final boolean isAWerewolfDeadFinal = isAWerewolfDead;
             final boolean isAWerewolfInPlayFinal = isAWerewolfInPlay;
             final boolean isTannerDeadFinal = isTannerDead;
 
             taskScheduler.schedule(
-                    () -> endGame(isAWerewolfDeadFinal, isAWerewolfInPlayFinal, isTannerDeadFinal, lynchedPlayerVotes, optionalLobby.get().getUsers()),
+                    () -> endGame(isAWerewolfDeadFinal, isAWerewolfInPlayFinal, isTannerDeadFinal, lynchedPlayerVotes, lobbyId),
                     new Date(System.currentTimeMillis() + 10000)
             );
         } else {
-            endGame(isAWerewolfDead, isAWerewolfInPlay, isTannerDead, lynchedPlayerVotes, optionalLobby.get().getUsers());
+            endGame(isAWerewolfDead, isAWerewolfInPlay, isTannerDead, lynchedPlayerVotes, lobbyId);
         }
     }
 
-    private void endGame(boolean isAWerewolfDead, boolean isAWerewolfInPlay, boolean isTannerDead, ArrayList<String> lynchedPlayerVotes, List<User> users) {
+    private void endGame(boolean isAWerewolfDead, boolean isAWerewolfInPlay, boolean isTannerDead, ArrayList<String> lynchedPlayerVotes, int lobbyId) {
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (!optionalLobby.isPresent()) {
+            logger.error("FATAL: We lost our lobbyId in endGame()");
+
+            return;
+        }
+
+        Long hunterKillId = null;
+        if (optionalLobby.get().getHunterKill() != null && optionalLobby.get().getHunterKill().length() > 1) {
+            try {
+                hunterKillId = Long.parseLong(optionalLobby.get().getHunterKill().substring(1));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+
+            if (hunterKillId != null) {
+                Optional<User> optionalUser = userService.findById(hunterKillId);
+                if (optionalUser.isPresent()) {
+                    PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+                    if (playerRole instanceof Werewolf) {
+                        isAWerewolfDead = true;
+                    } else if (playerRole instanceof Tanner) {
+                        isTannerDead = true;
+                    }
+                }
+            }
+        }
+
         Team winnerTeam = null;
 
         if (isAWerewolfDead) {
@@ -435,7 +489,7 @@ public class LobbyService {
         GameResult gameResult = new GameResult();
         gameResult.setGameEndTime(LocalDateTime.now());
 
-        for(User user : users) {
+        for(User user : optionalLobby.get().getUsers()) {
             PlayerRole playerRole = playerRoleService.getRole(user.getPlayer().getRoleId());
             boolean isDead = false;
             String playerVoteId = "u" + user.getId();
@@ -444,6 +498,10 @@ public class LobbyService {
                 if (s.equals(playerVoteId)) {
                     isDead = true;
                 }
+            }
+
+            if (hunterKillId != null && user.getId() == hunterKillId) {
+                isDead = true;
             }
 
             GameResultPlayer gameResultPlayer = new GameResultPlayer();

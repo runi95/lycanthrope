@@ -1,9 +1,9 @@
 package lycanthrope.controllers;
 
 import freemarker.template.Template;
+import lycanthrope.models.roles.Hunter;
 import lycanthrope.models.roles.Werewolf;
-import lycanthrope.services.PlayerRoleService;
-import lycanthrope.services.PlayerService;
+import lycanthrope.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import lycanthrope.models.*;
-import lycanthrope.services.LobbyService;
-import lycanthrope.services.UserService;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 
 import java.io.StringWriter;
@@ -40,7 +38,7 @@ public class WebSocketController {
     private PlayerRoleService playerRoleService;
 
     @Autowired
-    private FreeMarkerConfig freeMarkerConfig;
+    private FreemarkerService freemarkerService;
 
     private Logger logger = LoggerFactory.getLogger(WebSocketController.class);
 
@@ -241,6 +239,38 @@ public class WebSocketController {
         return performVoteAction(optionalUser.get(), webSocketRequestMessage.getValue());
     }
 
+    @MessageMapping("/hunterKill")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> hunterKill(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        if (webSocketRequestMessage.getValue() == null || webSocketRequestMessage.getValue().length() < 1) {
+            throw new Exception("Could not understand performed action");
+        }
+
+        if (!(playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()) instanceof Hunter)) {
+            throw new Exception("This role can't perform a hunter kill");
+        }
+
+        optionalUser.get().getLobby().setHunterKill(webSocketRequestMessage.getValue());
+        lobbyService.save(optionalUser.get().getLobby());
+
+        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        webSocketResponseMessage.setAction("hunterKill");
+        webSocketResponseMessage.setContent(webSocketRequestMessage.getValue());
+        webSocketResponseMessage.setStatus(200);
+
+        return webSocketResponseMessage;
+    }
+
     private WebSocketResponseMessage errorResponse(String message) {
         logger.warn(message);
 
@@ -251,19 +281,7 @@ public class WebSocketController {
         return webSocketResponseMessage;
     }
 
-    private WebSocketResponseMessage<String> parseTemplate(String templateName, Map model) throws Exception {
-        StringWriter stringWriter = new StringWriter();
 
-        Template temp = freeMarkerConfig.getConfiguration().getTemplate(templateName + ".ftlh");
-        temp.process(model, stringWriter);
-
-        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-        webSocketResponseMessage.setAction("changeView");
-        webSocketResponseMessage.setContent(stringWriter.getBuffer().toString());
-        webSocketResponseMessage.setStatus(200);
-
-        return webSocketResponseMessage;
-    }
 
     // TODO: Move the below functions to somewhere else
 
@@ -379,7 +397,7 @@ public class WebSocketController {
             user.getPlayer().setNightActionTargetTwo(messageValue);
             playerService.save(user.getPlayer());
 
-            return parseTemplate("gameNightAction", null);
+            return freemarkerService.parseTemplate("gameNightAction", null);
         } else if (actionsPerformed == 0) {
             user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
             user.getPlayer().setNightActionTarget(messageValue);
@@ -392,7 +410,7 @@ public class WebSocketController {
             map.put("userid", user.getId());
             map.put("lobby", user.getLobby());
 
-            return parseTemplate("gameNightAction", map);
+            return freemarkerService.parseTemplate("gameNightAction", map);
         } else {
             throw new Exception("You have already performed all your actions");
         }
@@ -410,7 +428,7 @@ public class WebSocketController {
         Map map = new HashMap();
         map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
 
-        return parseTemplate("gameNightAction", map);
+        return freemarkerService.parseTemplate("gameNightAction", map);
     }
 
     private WebSocketResponseMessage<String> performSeerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
@@ -441,7 +459,7 @@ public class WebSocketController {
             map.put("userid", user.getId());
             map.put("lobby", user.getLobby());
 
-            return parseTemplate("gameNightAction", map);
+            return freemarkerService.parseTemplate("gameNightAction", map);
         } else if (actionsPerformed == 1 && user.getPlayer().getNightActionTarget() != null && user.getPlayer().getNightActionTarget().length() > 0 && user.getPlayer().getNightActionTarget().charAt(0) == 'n') {
             user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
             user.getPlayer().setNightActionTarget(messageValue);
@@ -460,7 +478,7 @@ public class WebSocketController {
                     break;
             }
 
-            return parseTemplate("gameNightAction", map);
+            return freemarkerService.parseTemplate("gameNightAction", map);
         } else {
             throw new Exception("You have already performed all your actions");
         }
@@ -478,7 +496,7 @@ public class WebSocketController {
         Map map = new HashMap();
         map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
 
-        return parseTemplate("gameNightAction", null);
+        return freemarkerService.parseTemplate("gameNightAction", null);
     }
 
     private WebSocketResponseMessage<String> performDrunkAction(User user, int actionsPerformed, String messageValue) throws Exception {
@@ -490,7 +508,7 @@ public class WebSocketController {
         user.getPlayer().setNightActionTarget(messageValue);
         playerService.save(user.getPlayer());
 
-        return parseTemplate("gameNightAction", null);
+        return freemarkerService.parseTemplate("gameNightAction", null);
     }
 
     private WebSocketResponseMessage<String> performWerewolfAction(User user, int actionsPerformed, String messageValue) throws Exception {
@@ -532,7 +550,7 @@ public class WebSocketController {
         Map map = new HashMap();
         map.put("viewRole", playerRoleService.getRole(roleId).getName());
 
-        return parseTemplate("gameNightAction", map);
+        return freemarkerService.parseTemplate("gameNightAction", map);
     }
 
     /*
@@ -577,7 +595,7 @@ public class WebSocketController {
                 map.put("nightAction", nightActions[0]);
             }
 
-            return parseTemplate("gameNightAction", map);
+            return freemarkerService.parseTemplate("gameNightAction", map);
         } else {
             throw new Exception("You have already performed all your actions");
         }
