@@ -2,12 +2,8 @@ package lycanthrope.models.roles;
 
 import lycanthrope.models.*;
 
+@SuppressWarnings("Duplicates")
 public class Doppelganger implements PlayerRole {
-
-    @Override
-    public boolean isAbleToPerformOnDeathAction() {
-        return false;
-    }
 
     @Override
     public Team getTeam() {

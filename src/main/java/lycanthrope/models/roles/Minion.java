@@ -5,12 +5,8 @@ import lycanthrope.models.NightAction;
 import lycanthrope.models.PlayerRole;
 import lycanthrope.models.Team;
 
+@SuppressWarnings("Duplicates")
 public class Minion implements PlayerRole {
-
-    @Override
-    public boolean isAbleToPerformOnDeathAction() {
-        return false;
-    }
 
     @Override
     public Team getTeam() {

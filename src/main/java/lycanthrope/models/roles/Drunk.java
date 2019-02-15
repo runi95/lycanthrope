@@ -2,17 +2,11 @@ package lycanthrope.models.roles;
 
 import lycanthrope.models.*;
 
+@SuppressWarnings("Duplicates")
 public class Drunk implements PlayerRole {
 
     @Override
-    public boolean isAbleToPerformOnDeathAction() {
-        return false;
-    }
-
-    @Override
-    public Team getTeam() {
-        return Team.Village;
-    }
+    public Team getTeam() { return Team.Village; }
 
     @Override
     public String getName() {

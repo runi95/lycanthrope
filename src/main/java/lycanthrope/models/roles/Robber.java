@@ -2,14 +2,8 @@ package lycanthrope.models.roles;
 
 import lycanthrope.models.*;
 
+@SuppressWarnings("Duplicates")
 public class Robber implements PlayerRole {
-
-    int robbedPlayerId;
-
-    @Override
-    public boolean isAbleToPerformOnDeathAction() {
-        return false;
-    }
 
     @Override
     public Team getTeam() {
@@ -46,12 +40,4 @@ public class Robber implements PlayerRole {
             return new Roles[]{};
         }
     }}; }
-
-    public int getRobbedPlayerId() {
-        return robbedPlayerId;
-    }
-
-    public void setRobbedPlayerId(int robbedPlayerId) {
-        this.robbedPlayerId = robbedPlayerId;
-    }
 }
