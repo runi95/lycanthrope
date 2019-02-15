@@ -32,59 +32,11 @@ public class GameController {
 
     @GetMapping("/game")
     public String getGame(Model model, Principal principal) throws Exception {
-        /*
-        if (lobbyId == null) {
-            throw new Exception("lobbyId can't be null");
-        }
-
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        Optional<Lobby> optionalLobby = lobbyService.findLobbyById(lobbyId);
-        if (!optionalLobby.isPresent()) {
-            throw new Exception("Could not find any lobbies with the given lobbyId");
-        }
-
-        model.addAttribute("user", optionalUser.get());
-        model.addAttribute("lobby", optionalLobby.get());
-        */
-
         return "game";
     }
 
     @GetMapping("/day/{lobbyId}")
     public String getDay(@PathVariable(name = "lobbyId") Integer lobbyId, Model model, Principal principal) throws Exception {
-        /*
-        if (lobbyId == null) {
-            throw new Exception("lobbyId can't be null");
-        }
-
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        Optional<Lobby> optionalLobby = lobbyService.findLobbyById(lobbyId);
-        if (!optionalLobby.isPresent()) {
-            throw new Exception("Could not find any lobbies with the given lobbyId");
-        }
-
-        model.addAttribute("user", optionalUser.get());
-        model.addAttribute("lobby", optionalLobby.get());
-        */
-
         return "gameVote";
     }
 
