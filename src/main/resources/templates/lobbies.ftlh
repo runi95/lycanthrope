@@ -7,6 +7,7 @@
                 </h1>
                 <hr>
                 <button class="btn btn-block btn-primary" onclick="getCreateLobbyView()">Create Lobby</button>
+                <br>
                 <div id="lobbytable" class="d-flex flex-column">
                     <#list lobbyList as lobby>
                         <div>
