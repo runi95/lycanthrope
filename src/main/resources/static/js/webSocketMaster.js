@@ -47,6 +47,9 @@ function handleActions(message) {
         case "requestGameEndAction":
             getGameResult(message.content);
             break;
+        case "requestJoinLobby":
+            requestJoinLobby(message.content);
+            break;
     }
 }
 

@@ -302,8 +302,8 @@ public class WebSocketController {
     }
 
     @MessageMapping("/createLobby")
-    @SendTo("/endpoint/broadcast")
-    public WebSocketResponseMessage<Pair<Lobby, String>> createLobby(WebSocketRequestMessage<Pair<Map<String, String>, Integer>> webSocketRequestMessage, Principal principal) throws Exception {
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<Integer> createLobby(WebSocketRequestMessage<Pair<Map<String, String>, Integer>> webSocketRequestMessage, Principal principal) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
         if (principal == null) {
             throw new Exception("Unauthorized");
@@ -388,7 +388,6 @@ public class WebSocketController {
             }
         }
 
-
         lobby.setName(optionalUser.get().getNickname() + "'s Lobby");
         lobby.setLobbyMaxSize(webSocketRequestMessage.getValue().getVal());
         lobby.setState(1);
@@ -399,17 +398,14 @@ public class WebSocketController {
 
         lobbyService.save(lobby);
 
-        WebSocketResponseMessage<Pair<Lobby, String>> message = new WebSocketResponseMessage<>();
+        lobbyService.broadcastCreateLobby(lobby, optionalUser.get().getNickname());
 
-        Pair<Lobby, String> pair = new Pair<>();
-        pair.setKey(lobby);
-        pair.setVal(optionalUser.get().getNickname());
+        WebSocketResponseMessage<Integer> webSocketResponseMessage = new WebSocketResponseMessage<>();
+        webSocketResponseMessage.setAction("requestJoinLobby");
+        webSocketResponseMessage.setStatus(200);
+        webSocketResponseMessage.setContent(lobby.getId());
 
-        message.setContent(pair);
-        message.setAction("createLobby");
-        message.setStatus(200);
-
-        return message;
+        return webSocketResponseMessage;
     }
 
     @MessageMapping("/nightAction")
@@ -434,7 +430,7 @@ public class WebSocketController {
 
     // @SendToUser(value = "/endpoint/private")
     @MessageMapping("/voteAction")
-    @SendTo(value = "/endpoint/broadcast")
+    @SendTo(value = "/endpoint/broadcast/{lobbyId}")
     public WebSocketResponseMessage<String> voteAction(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
         if (principal == null) {

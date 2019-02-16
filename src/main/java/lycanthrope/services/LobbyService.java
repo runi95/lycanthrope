@@ -64,6 +64,19 @@ public class LobbyService {
         return lobbyRepository.findById(boardId);
     }
 
+    public void broadcastCreateLobby(Lobby lobby, String nickname) {
+        Pair<Lobby, String> pair = new Pair<>();
+        pair.setKey(lobby);
+        pair.setVal(nickname);
+
+        WebSocketResponseMessage<Pair<Lobby, String>> webSocketResponseMessage = new WebSocketResponseMessage<>();
+        webSocketResponseMessage.setContent(pair);
+        webSocketResponseMessage.setAction("createLobby");
+        webSocketResponseMessage.setStatus(200);
+
+        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+    }
+
     public Optional<Lobby> joinLobby(int boardId, User user) {
         Lobby lobby = null;
         Optional<Lobby> optionalLobby = findLobbyById(boardId);
@@ -163,17 +176,17 @@ public class LobbyService {
                 webSocketResponseMessage.setContent("");
                 webSocketResponseMessage.setStatus(200);
 
-                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+                simpTemplate.convertAndSend("/endpoint/broadcast/" + lobby.getId(), webSocketResponseMessage);
 
                 int lobbyId = lobby.getId();
-                startCountdown(GAME_ROLE_REVEAL_TIME, () -> scheduleRoleReveal(lobbyId));
+                startCountdown(GAME_ROLE_REVEAL_TIME, lobbyId, () -> scheduleRoleReveal(lobbyId));
             } else {
                 WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
                 webSocketResponseMessage.setAction("joinLobby");
                 webSocketResponseMessage.setContent(new Pair<>(user, optionalLobby.get()));
                 webSocketResponseMessage.setStatus(200);
 
-                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+                simpTemplate.convertAndSend("/endpoint/broadcast/" + lobby.getId(), webSocketResponseMessage);
             }
 
             return Optional.of(lobby);
@@ -206,7 +219,7 @@ public class LobbyService {
         }).start();
     }
 
-    public void startCountdown(int seconds, Runnable runnable) {
+    public void startCountdown(int seconds, int lobbyId, Runnable runnable) {
         new Thread(() -> {
             int i = seconds - 1;
             while (i >= 0) {
@@ -221,7 +234,7 @@ public class LobbyService {
                 webSocketResponseMessage.setContent((100.00 * i) / (double)seconds);
                 webSocketResponseMessage.setStatus(200);
 
-                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+                simpTemplate.convertAndSend("/endpoint/broadcast/" + lobbyId, webSocketResponseMessage);
 
                 i--;
             }
@@ -253,8 +266,8 @@ public class LobbyService {
         webSocketResponseMessage.setAction("requestNightAction");
         webSocketResponseMessage.setContent("");
 
-        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-        startCountdown(GAME_NIGHT_ACTION_TIME, () -> scheduleNightAction(lobbyId));
+        simpTemplate.convertAndSend("/endpoint/broadcast/" + lobbyId, webSocketResponseMessage);
+        startCountdown(GAME_NIGHT_ACTION_TIME, lobbyId, () -> scheduleNightAction(lobbyId));
     }
 
     private void scheduleNightAction(int lobbyId) {
@@ -387,8 +400,8 @@ public class LobbyService {
         webSocketResponseMessage.setAction("requestGame");
         webSocketResponseMessage.setContent("");
 
-        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-        startCountdown(GAME_DISCUSSION_TIME, () -> scheduleVoteAction(lobbyId));
+        simpTemplate.convertAndSend("/endpoint/broadcast/" + lobbyId, webSocketResponseMessage);
+        startCountdown(GAME_DISCUSSION_TIME, lobbyId, () -> scheduleVoteAction(lobbyId));
     }
 
     private void scheduleVoteAction(int lobbyId) {
@@ -403,9 +416,9 @@ public class LobbyService {
         webSocketResponseMessage.setAction("requestVoteAction");
         webSocketResponseMessage.setContent("");
 
-        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+        simpTemplate.convertAndSend("/endpoint/broadcast/" + lobbyId, webSocketResponseMessage);
 
-        startCountdown(GAME_VOTE_TIME, () -> scheduleGameEnd(lobbyId));
+        startCountdown(GAME_VOTE_TIME, lobbyId, () -> scheduleGameEnd(lobbyId));
     }
 
     private void scheduleGameEnd(int lobbyId) {
@@ -590,6 +603,6 @@ public class LobbyService {
         webSocketResponseMessage.setAction("requestGameEndAction");
         webSocketResponseMessage.setContent(Long.toString(gameResult.getId()));
 
-        simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+        simpTemplate.convertAndSend("/endpoint/broadcast/" + lobbyId, webSocketResponseMessage);
     }
 }

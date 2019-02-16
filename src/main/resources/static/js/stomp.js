@@ -65,7 +65,7 @@ function connect() {
             receiveMessage(JSON.parse(message.body));
         });
 
-        stompClient.event
+        // stompClient.event
         getLobbies();
     }, function () {
         setConnected(false);
@@ -86,6 +86,9 @@ function getLobbies() {
 }
 
 function requestJoinLobby(lobbyId) {
+    stompClient.subscribe('/endpoint/broadcast/' + lobbyId, function (message) {
+        receiveMessage(JSON.parse(message.body));
+    });
     stompClient.send("/websock/joinLobby", {}, JSON.stringify({"action": "join", "value": lobbyId}));
 }
 
