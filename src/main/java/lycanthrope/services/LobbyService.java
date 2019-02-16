@@ -168,7 +168,7 @@ public class LobbyService {
                 int lobbyId = lobby.getId();
                 taskScheduler.schedule(() -> {
                     scheduleRoleReveal(lobbyId);
-                }, new Date(System.currentTimeMillis() + 7000)); // Used to be 30000
+                }, new Date(System.currentTimeMillis() + 30000));
             } else {
                 WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
                 webSocketResponseMessage.setAction("joinLobby");
@@ -210,7 +210,7 @@ public class LobbyService {
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
         taskScheduler.schedule(() -> {
             scheduleNightAction(lobbyId);
-        }, new Date(System.currentTimeMillis() + 5000)); // Used to be 20000
+        }, new Date(System.currentTimeMillis() + 20000));
     }
 
     private void scheduleNightAction(int lobbyId) {
@@ -347,7 +347,7 @@ public class LobbyService {
 
         taskScheduler.schedule(
                 () -> scheduleVoteAction(lobbyId),
-                new Date(System.currentTimeMillis() + 10000) // Used to be 100000
+                new Date(System.currentTimeMillis() + 10000)
         );
     }
 
