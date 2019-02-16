@@ -11,6 +11,9 @@ function changeView(view) {
 
 function handleActions(message) {
     switch (message.action) {
+        case "setTime":
+            setTime(message.content);
+            break;
         case "changeView":
             changeView(message.content);
             break;
@@ -47,6 +50,15 @@ function handleActions(message) {
         case "requestGameEndAction":
             getGameResult(message.content);
             break;
+    }
+}
+
+function setTime(time) {
+    var progBar = document.getElementById("progressbar");
+    if (progBar) {
+        progBar.setAttribute("style", "width: " + time + "%");
+    } else {
+        console.warn("Attempted to change progress bar time without a progress bar");
     }
 }
 

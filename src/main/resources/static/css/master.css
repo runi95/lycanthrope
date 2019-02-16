@@ -3,6 +3,18 @@ body {
     background: #333333;
 }
 
+#progressbar {
+    -o-transition: width 1s;
+    -moz-transition: width 1s;
+    -webkit-transition: width 1s;
+    transition: width 1s;
+
+    -o-transition-timing-function: linear;
+    -moz-transition-timing-function: linear;
+    -webkit-transition-timing-function: linear;
+    transition-timing-function: linear;
+}
+
 #lobbytable > div {
     margin-bottom: 10px;
 }

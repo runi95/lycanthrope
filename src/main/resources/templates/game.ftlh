@@ -40,6 +40,7 @@
     }
 </style>
 <script>
+    /*
     var progress = 100;
     var startTime = 10 * 60;
     var timeLeft = 600;
@@ -79,6 +80,7 @@
             elem.setAttribute("aria-valuenow", progress);
         }
     }
+    */
 
     function hideSecretMessage() {
         var elem = document.getElementById("secretmsg");

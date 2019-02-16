@@ -81,6 +81,7 @@
     }
 </style>
 <script>
+    /*
     var progress = 100;
     var intervalInMilliseconds = 1000 / 100 * 60;
     var intervalTimer = setInterval(updateProgressBar, intervalInMilliseconds);
@@ -95,6 +96,7 @@
             clearInterval(intervalTimer);
         }
     }
+    */
 
     function performNightAction(elem) {
         nightAction(elem.id);

@@ -14,13 +14,18 @@ import org.springframework.stereotype.Service;
 import lycanthrope.models.*;
 import lycanthrope.repositories.LobbyRepository;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
 @Service
 public class LobbyService {
+
+    public static final int GAME_ROLE_REVEAL_TIME = 30;
+    public static final int GAME_DISCUSSION_TIME = 600;
+    public static final int GAME_VOTE_TIME = 30;
+    public static final int GAME_NIGHT_ACTION_TIME = 30;
+    public static final int GAME_HUNTER_KILL_TIME = 20;
 
     private final Semaphore joinLobbySemaphore = new Semaphore(1);
     private final Semaphore createLobbySemaphore = new Semaphore(1);
@@ -50,11 +55,6 @@ public class LobbyService {
 
     @Autowired
     private FreemarkerService freemarkerService;
-
-    @Autowired
-    private GameResultPlayerService gameResultPlayerService;
-
-    private Random random = new Random();
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -129,7 +129,8 @@ public class LobbyService {
                     }
 
                     int one = iterator.next().ordinal();
-                    int two = iterator.next().ordinal();;
+                    int two = iterator.next().ordinal();
+                    ;
                     int three = iterator.next().ordinal();
 
                     lobby.setNeutralOne(one);
@@ -166,9 +167,7 @@ public class LobbyService {
                 simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
 
                 int lobbyId = lobby.getId();
-                taskScheduler.schedule(() -> {
-                    scheduleRoleReveal(lobbyId);
-                }, new Date(System.currentTimeMillis() + 30000));
+                startCountdown(GAME_ROLE_REVEAL_TIME, () -> scheduleRoleReveal(lobbyId));
             } else {
                 WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
                 webSocketResponseMessage.setAction("joinLobby");
@@ -182,6 +181,54 @@ public class LobbyService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public void startCountdownHunter(int seconds, String deadHunterId, Runnable runnable) {
+        new Thread(() -> {
+            int i = seconds - 1;
+            while (i >= 0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+                webSocketResponseMessage.setAction("setTime");
+                webSocketResponseMessage.setContent((100.00 * i) / (double)seconds);
+                webSocketResponseMessage.setStatus(200);
+
+                simpTemplate.convertAndSendToUser(deadHunterId, "/endpoint/private", webSocketResponseMessage);
+
+                i--;
+            }
+
+            taskScheduler.schedule(runnable, new Date(System.currentTimeMillis() + 2000));
+        }).start();
+    }
+
+    public void startCountdown(int seconds, Runnable runnable) {
+        new Thread(() -> {
+            int i = seconds - 1;
+            while (i >= 0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+                webSocketResponseMessage.setAction("setTime");
+                webSocketResponseMessage.setContent((100.00 * i) / (double)seconds);
+                webSocketResponseMessage.setStatus(200);
+
+                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+
+                i--;
+            }
+
+            taskScheduler.schedule(runnable, new Date(System.currentTimeMillis() + 2000));
+        }).start();
     }
 
     public void delete(Lobby lobby) {
@@ -208,9 +255,7 @@ public class LobbyService {
         webSocketResponseMessage.setContent("");
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-        taskScheduler.schedule(() -> {
-            scheduleNightAction(lobbyId);
-        }, new Date(System.currentTimeMillis() + 20000));
+        startCountdown(GAME_NIGHT_ACTION_TIME, () -> scheduleNightAction(lobbyId));
     }
 
     private void scheduleNightAction(int lobbyId) {
@@ -344,11 +389,7 @@ public class LobbyService {
         webSocketResponseMessage.setContent("");
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
-
-        taskScheduler.schedule(
-                () -> scheduleVoteAction(lobbyId),
-                new Date(System.currentTimeMillis() + 10000)
-        );
+        startCountdown(GAME_DISCUSSION_TIME, () -> scheduleVoteAction(lobbyId));
     }
 
     private void scheduleVoteAction(int lobbyId) {
@@ -359,10 +400,7 @@ public class LobbyService {
 
         simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
 
-        taskScheduler.schedule(
-                () -> scheduleGameEnd(lobbyId),
-                new Date(System.currentTimeMillis() + 10000)
-        );
+        startCountdown(GAME_VOTE_TIME, () -> scheduleGameEnd(lobbyId));
     }
 
     private void scheduleGameEnd(int lobbyId) {
@@ -383,7 +421,7 @@ public class LobbyService {
         Map<String, Integer> playerMap = new HashMap<>();
 
         boolean isAWerewolfInPlay = false;
-        for(User user : optionalLobby.get().getUsers()) {
+        for (User user : optionalLobby.get().getUsers()) {
             if (playerRoleService.getRole(user.getPlayer().getRoleId()) instanceof Werewolf) {
                 isAWerewolfInPlay = true;
             }
@@ -414,7 +452,7 @@ public class LobbyService {
         boolean isHunterDead = false;
         String deadHunterId = null;
         HashMap<Long, User> deadUsers = new HashMap<>();
-        for(String s : lynchedPlayerVotes) {
+        for (String s : lynchedPlayerVotes) {
             if (s.length() > 1) {
                 Integer userId = null;
 
@@ -454,7 +492,7 @@ public class LobbyService {
                 map.put("users", users);
 
                 WebSocketResponseMessage<String> webSocketResponseMessage = freemarkerService.parseTemplate("hunterKill", map);
-                simpTemplate.convertAndSendToUser(deadHunterId,"/endpoint/private", webSocketResponseMessage);
+                simpTemplate.convertAndSendToUser(deadHunterId, "/endpoint/private", webSocketResponseMessage);
             } catch (Exception e) {
                 logger.error("Failed to parse hunterKill.ftlh!");
             }
@@ -463,10 +501,7 @@ public class LobbyService {
             final boolean isAWerewolfInPlayFinal = isAWerewolfInPlay;
             final boolean isTannerDeadFinal = isTannerDead;
 
-            taskScheduler.schedule(
-                    () -> endGame(isAWerewolfDeadFinal, isAWerewolfInPlayFinal, isTannerDeadFinal, lynchedPlayerVotes, lobbyId),
-                    new Date(System.currentTimeMillis() + 10000)
-            );
+            startCountdownHunter(GAME_HUNTER_KILL_TIME, deadHunterId, () -> endGame(isAWerewolfDeadFinal, isAWerewolfInPlayFinal, isTannerDeadFinal, lynchedPlayerVotes, lobbyId));
         } else {
             endGame(isAWerewolfDead, isAWerewolfInPlay, isTannerDead, lynchedPlayerVotes, lobbyId);
         }
@@ -516,7 +551,7 @@ public class LobbyService {
         GameResult gameResult = new GameResult();
         gameResult.setGameEndTime(LocalDateTime.now());
 
-        for(User user : optionalLobby.get().getUsers()) {
+        for (User user : optionalLobby.get().getUsers()) {
             PlayerRole playerRole = playerRoleService.getRole(user.getPlayer().getRoleId());
             boolean isDead = false;
             String playerVoteId = "u" + user.getId();

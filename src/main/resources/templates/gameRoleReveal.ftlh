@@ -24,11 +24,13 @@
     }
 </style>
 <script>
+    var roleName = "${roleName}";
+    var isRoleRevealed = false;
+
+    /*
     var progress = 100;
     var intervalInMilliseconds = 1000 / 100 * 10;
     var intervalTimer = setInterval(updateProgressBar, intervalInMilliseconds);
-    var isRoleRevealed = false;
-    var roleName = "${roleName}";
 
     function updateProgressBar() {
         if (progress > 0) {
@@ -43,13 +45,14 @@
             }
         }
     }
+    */
 
+    // TODO: This broke at some point and needs to be fixed!
     function revealRole() {
         if (!isRoleRevealed) {
             isRoleRevealed = true;
 
             document.getElementById("progressbar").setAttribute("style", "width: 0%");
-            clearInterval(intervalTimer);
             document.getElementById("rolediv").appendChild(document.createTextNode(roleName));
         }
     }
