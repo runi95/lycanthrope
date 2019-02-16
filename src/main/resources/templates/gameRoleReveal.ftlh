@@ -47,12 +47,10 @@
     }
     */
 
-    // TODO: This broke at some point and needs to be fixed!
     function revealRole() {
         if (!isRoleRevealed) {
             isRoleRevealed = true;
 
-            document.getElementById("progressbar").setAttribute("style", "width: 0%");
             document.getElementById("rolediv").appendChild(document.createTextNode(roleName));
         }
     }
