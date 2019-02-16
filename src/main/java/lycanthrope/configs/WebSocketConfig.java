@@ -3,6 +3,7 @@ package lycanthrope.configs;
 import lycanthrope.models.Lobby;
 import lycanthrope.models.User;
 import lycanthrope.models.WebSocketResponseMessage;
+import lycanthrope.services.LobbyService;
 import lycanthrope.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LobbyService lobbyService;
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -61,9 +65,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             return;
         }
 
-        if (optionalUser.get().getLobby().getState() > 1 || optionalUser.get().getLobby().getUsers().size() > 2) {
+        if (optionalUser.get().getLobby().getState() == 1) {
             Lobby lobby = optionalUser.get().getLobby();
             lobby.removeUser(optionalUser.get());
+            lobbyService.save(lobby);
             userService.save(optionalUser.get());
 
             WebSocketResponseMessage<User> webSocketResponseMessage = new WebSocketResponseMessage<>();
