@@ -18,7 +18,7 @@
                             <div id="${lobby.id}s">
                                 ${lobby.currentPlayerSize}/${lobby.lobbyMaxSize}
                             </div>
-                            <button class="btn btn-primary" onclick="joinLobbyRequest(${lobby.id})">
+                            <button class="btn btn-info" onclick="joinLobbyRequest(${lobby.id})">
                                 Join
                             </button>
                         </div>
