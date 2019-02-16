@@ -32,6 +32,7 @@ public class GameController {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    /*
     @GetMapping("/game")
     public String getGame(Model model, Principal principal) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
@@ -51,12 +52,14 @@ public class GameController {
 
         return "game";
     }
+    */
 
     @GetMapping("/day/{lobbyId}")
     public String getDay(@PathVariable(name = "lobbyId") Integer lobbyId, Model model, Principal principal) throws Exception {
         return "gameVote";
     }
 
+    /*
     @GetMapping("/game/{lobbyId}/roleReveal")
     public String getRole(Principal principal, Model model) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
@@ -77,7 +80,9 @@ public class GameController {
 
         return "gameRoleReveal";
     }
+    */
 
+    /*
     @GetMapping("/nightAction")
     public String getNightAction(Model model, Principal principal) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
@@ -106,7 +111,9 @@ public class GameController {
 
         return "gameNightAction";
     }
+    */
 
+    /*
     @GetMapping("/result/{gameResultId}")
     public String getVote(@PathVariable("gameResultId") Long gameResultId, Principal principal, Model model) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
@@ -130,7 +137,9 @@ public class GameController {
 
         return "gameEnd";
     }
+    */
 
+    /*
     @GetMapping("/voteAction")
     public String getVoteAction(Principal principal, Model model) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
@@ -149,4 +158,5 @@ public class GameController {
 
         return "gameVote";
     }
+    */
 }

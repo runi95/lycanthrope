@@ -1,5 +1,3 @@
-<#import "master.ftlh" as m>
-<@m.master>
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
@@ -31,7 +29,8 @@
                 <button class="btn btn-block btn-primary" id="hunter" onclick="setRole(this)">Hunter</button>
                 <button class="btn btn-block btn-primary" id="drunk" onclick="setRole(this)">Drunk</button>
                 <button class="btn btn-block btn-primary" id="insomniac" onclick="setRole(this)">Insomniac</button>
-                <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker</button>
+                <button class="btn btn-block btn-primary" id="troublemaker" onclick="setRole(this)">Troublemaker
+                </button>
                 <button class="btn btn-block btn-primary" id="robber" onclick="setRole(this)">Robber</button>
                 <button class="btn btn-block btn-primary" id="seer" onclick="setRole(this)">Seer</button>
                 <button class="btn btn-block btn-primary" id="mason1" onclick="setRole(this)">Mason 1</button>
@@ -46,7 +45,9 @@
                 <button class="btn btn-block btn-primary" id="werewolf2" onclick="setRole(this)">Werewolf 2</button>
                 <hr>
                 <div class="text-danger" id="errorlabel"></div>
-                <button class="btn btn-block btn-success" id="btndone" onclick="createNewLobby(activeRoles, players)">Create Lobby</button>
+                <button class="btn btn-block btn-success" id="btndone" onclick="createNewLobby(activeRoles, players)">
+                    Create Lobby
+                </button>
             </div>
             <br>
         </div>
@@ -145,4 +146,3 @@
         }
     }
 </script>
-</@m.master>

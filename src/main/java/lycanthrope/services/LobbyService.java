@@ -37,7 +37,7 @@ public class LobbyService {
     private TaskScheduler taskScheduler;
 
     @Autowired
-    SimpMessagingTemplate simpTemplate;
+    private SimpMessagingTemplate simpTemplate;
 
     @Autowired
     private PlayerService playerService;
@@ -110,7 +110,6 @@ public class LobbyService {
                     Iterator<Roles> iterator = rolesArrayList.iterator();
 
                     int wolves = 0;
-                    int i = 0;
                     for (User u : lobby.getUsers()) {
                         Player player = new Player();
                         Roles roles = iterator.next();
@@ -121,15 +120,6 @@ public class LobbyService {
                         player.setRoleId(roles.ordinal());
                         player.setUser(u);
                         u.setPlayer(player);
-
-                        if (i == 0) {
-                            player.setRoleId(Roles.DRUNK.ordinal());
-                        } else if (i == 1) {
-                            player.setRoleId(Roles.INSOMNIAC.ordinal());
-                        } else if (i == 2) {
-                            player.setRoleId(Roles.ROBBER.ordinal());
-                        }
-                        i++;
 
                         if (playerRoleService.getRole(player.getRoleId()) instanceof Insomniac) {
                             player.setRealInsomniac(true);
@@ -168,10 +158,24 @@ public class LobbyService {
 
         if (success) {
             if (started) {
+                WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+                webSocketResponseMessage.setAction("requestGameRoleReveal");
+                webSocketResponseMessage.setContent("");
+                webSocketResponseMessage.setStatus(200);
+
+                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
+
                 int lobbyId = lobby.getId();
                 taskScheduler.schedule(() -> {
                     scheduleRoleReveal(lobbyId);
                 }, new Date(System.currentTimeMillis() + 7000)); // Used to be 30000
+            } else {
+                WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+                webSocketResponseMessage.setAction("joinLobby");
+                webSocketResponseMessage.setContent(new Pair<>(user, optionalLobby.get()));
+                webSocketResponseMessage.setStatus(200);
+
+                simpTemplate.convertAndSend("/endpoint/broadcast", webSocketResponseMessage);
             }
 
             return Optional.of(lobby);

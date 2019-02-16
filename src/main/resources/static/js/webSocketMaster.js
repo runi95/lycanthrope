@@ -1,6 +1,6 @@
 var lobbies = {};
 var currentLobbyId;
-var playerNumber;
+// var playerNumber;
 
 var csrf_name = $('meta[name="csrf_name"]').attr('content');
 var csrf_value = $('meta[name="csrf_value"]').attr('content');
@@ -18,17 +18,22 @@ function handleActions(message) {
             populateLobbies(message.content);
             break;
         case "createLobby":
-            console.log("createLobby");
             populateNewLobby(message.content);
             break;
         case "updateVotes":
             updateVotes(message.content);
+            break;
+        case "joinLobby":
+            joinLobby(message.content);
             break;
         case "loadlobby":
             loadLobby(message.content);
             break;
         case "disconnected":
             disconnectPlayer(message.content);
+            break;
+        case "requestGameRoleReveal":
+            getRoleReveal();
             break;
         case "requestNightAction":
             getNightAction();
@@ -47,8 +52,6 @@ function handleActions(message) {
 
 function populateNewLobby(newLobby) {
     lobbies[newLobby.key.id] = newLobby.key;
-
-    console.log($("meta[name=nickname]").attr("content") + " === " + newLobby.val);
 
     if ($("meta[name=nickname]").attr("content") === newLobby.val) {
         createLobbyPrivate(newLobby.key);
@@ -96,43 +99,24 @@ function addLobbyToLobbyTable(lobby) {
     $("#lobbytable").append(lobbyDiv);
 }
 
-function loadLobby(message) {
-    lobbies[message.id] = lobbies;
-
-    if (message.id === currentLobbyId) {
-        if (message.state >= 2) {
-            // TODO: This is definitely not the best way to find our playerNumber, it should be changed in the future!
-            for (var i = 0; i < message.users.length; i++) {
-                if ($("meta[name=nickname]").attr("content") === message.users[i].nickname) {
-                    playerNumber = message.users[i].playerNumber;
-                }
-            }
-
-            joinGame(message);
+function joinLobby(message) {
+    if (message.val.id === currentLobbyId) {
+        var elements = document.getElementsByClassName("list-group-item-empty");
+        var element;
+        if (elements.length > 0) {
+            element = elements[0];
         } else {
-            for (var i = 0; i < message.users.length; i++) {
-                var playerElement = document.getElementById(message.users[i].id);
+            element = elements;
+        }
 
-                if (playerElement === null) {
-                    var elements = document.getElementsByClassName("list-group-item-empty");
-                    var element;
-                    if (elements.length > 0) {
-                        element = elements[0];
-                    } else {
-                        element = elements;
-                    }
+        var text = document.createTextNode(message.key.nickname);
+        element.replaceChild(text, element.childNodes[0]);
+        element.setAttribute("id", message.key.id);
 
-                    var text = document.createTextNode(message.users[i].nickname);
-                    element.replaceChild(text, element.childNodes[0]);
-                    element.setAttribute("id", message.users[i].id);
-
-                    if ($("meta[name=nickname]").attr("content") === message.users[i].nickname) {
-                        element.setAttribute("class", "list-group-item list-group-item-success");
-                    } else {
-                        element.setAttribute("class", "list-group-item list-group-item-default");
-                    }
-                }
-            }
+        if ($("meta[name=nickname]").attr("content") === message.key.nickname) {
+            element.setAttribute("class", "list-group-item list-group-item-success");
+        } else {
+            element.setAttribute("class", "list-group-item list-group-item-default");
         }
     }
 }
@@ -149,7 +133,7 @@ function updateVotes(vote) {
         if (vote.voteIndicator === "+") {
             var votedPlayer = document.getElementById(vote.votedFor);
             if (votedPlayer) {
-                votedPlayer.setAttribute("class", "btn btn-block btn-outline-secondary");
+                votedPlayer.setAttribute("class", "btn btn-block btn-secondary");
             } else {
                 console.warn("Could not find votedPlayer(", votedPlayer, ")");
             }
@@ -170,86 +154,22 @@ function updateVotes(vote) {
 }
 
 function createLobbyPrivate(lobby) {
-    $.ajax({
-        url: "/lobby/" + lobby.id,
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-            currentLobbyId = lobby.id;
-            loadLobby(lobby);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
-}
-
-function joinGame(lobby) {
-    var url;
-    if (lobby.state === 2) {
-        url = "/game/" + lobby.id + "/roleReveal";
-    } else {
-        url = "/game/" + lobby.id;
-    }
-
-    $.ajax({
-        url: url,
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
-}
-
-function loadLobbyView(id) {
-    $.ajax({
-        url: "/lobby/" + id,
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-            currentLobbyId = id;
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestLobby(lobby.id);
 }
 
 function joinLobbyRequest(id) {
-    $.ajax({
-        url: "/lobby/" + id,
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-            currentLobbyId = id;
-            joinLobby(id);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestJoinLobby(id);
 }
 
 function getCreateLobbyView() {
-    $.ajax({
-        url: "/createLobby",
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestCreateLobby();
 }
 
 function createNewLobby(roles, playerSize) {
     createLobby({key: roles, val: playerSize});
 }
 
+// This one might not be converted to a websocket request
 function loadLobbies() {
     $.ajax({
         url: "/lobbies",
@@ -264,53 +184,21 @@ function loadLobbies() {
 }
 
 function getNightAction() {
-    $.ajax({
-        url: "/nightAction",
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestNightAction();
+}
+
+function getRoleReveal() {
+    requestRoleReveal();
 }
 
 function getGame() {
-    $.ajax({
-        url: "/game",
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestGame();
 }
 
 function getVoteAction() {
-    $.ajax({
-        url: "/voteAction",
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestVoteAction();
 }
 
 function getGameResult(gameResultId) {
-    $.ajax({
-        url: "/result/" + gameResultId,
-        type: "GET",
-        success: function (result) {
-            changeView(result);
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
+    requestGameResult(gameResultId);
 }

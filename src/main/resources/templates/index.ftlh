@@ -22,7 +22,7 @@
                             <input name="nickname" type="text" class="form-control input-opaque" id="nickname"
                                    aria-describedby="nicknameHelp" placeholder="Enter Nickname*"
                                    required autofocus maxlength="16" pattern="^[\w\-']+$">
-                            <small id="nicknameHelp" class="form-text text-muted">*A nickname can only contain english alphanumeric characters</small>
+                            <small id="nicknameHelp" class="form-text text-muted">*Nicknames may only contain english alphanumeric characters</small>
                             <#if error??><small class="text-danger">${error}</small></#if>
                         </div>
                         <div class="d-flex">

@@ -7,15 +7,18 @@ import lycanthrope.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import lycanthrope.models.*;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 
 import java.io.StringWriter;
 import java.security.Principal;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,20 +43,228 @@ public class WebSocketController {
     @Autowired
     private FreemarkerService freemarkerService;
 
+    @Autowired
+    private GameResultService gameResultService;
+
     private Logger logger = LoggerFactory.getLogger(WebSocketController.class);
 
-    @MessageMapping("/joinLobby")
-    @SendTo(value = "/endpoint/broadcast")
-    public WebSocketResponseMessage<String> joinLobby(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) {
-        String boardIdString = webSocketRequestMessage.getValue();
-        Integer boardId = null;
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    // TODO: Make sure you can only view game results about games you've played in (very low priority)
+    @MessageMapping("/requestGameResult/{gameResultId}")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestGameResult(@DestinationVariable String gameResultId, Principal principal) throws Exception {
+        if (gameResultId == null) {
+            throw new Exception("Invalid gameResultId");
+        }
+
+        if (gameResultId.length() < 1) {
+            throw new Exception("gameResultId has invalid length");
+        }
+
+        Long gameResultLong = null;
         try {
-            boardId = Integer.parseInt(boardIdString);
+            gameResultLong = Long.parseLong(gameResultId);
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
 
-        if (boardId == null) {
+        if (gameResultLong == null || gameResultLong < 1) {
+            throw new Exception("Bad gameResultLong");
+        }
+
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<GameResult> optionalGameResult = gameResultService.find(gameResultLong);
+        if (!optionalGameResult.isPresent()) {
+            throw new Exception("Could not find a game result with the given id");
+        }
+
+        String gameEndTime = optionalGameResult.get().getGameEndTime().format(dateTimeFormatter);
+
+        Map map = new HashMap();
+        map.put("gameresult", optionalGameResult.get());
+        map.put("gameEndTime", gameEndTime);
+
+        return freemarkerService.parseTemplate("gameEnd", map);
+    }
+
+    @MessageMapping("/requestVoteAction")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestVoteAction(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        Map map = new HashMap();
+        map.put("lobby", optionalUser.get().getLobby());
+        map.put("userid", optionalUser.get().getId());
+        map.put("vote", optionalUser.get().getPlayer().getVote());
+
+        return freemarkerService.parseTemplate("gameVote", map);
+    }
+
+    @MessageMapping("/requestGame")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestGame(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        Map map = new HashMap();
+
+        if (optionalUser.get().getPlayer().isRealInsomniac()) {
+            PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+            map.put("secretMessage", "You wake up as the " + playerRole.getName());
+        }
+
+        return freemarkerService.parseTemplate("game", map);
+    }
+
+    @MessageMapping("/requestNightAction")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestNightAction(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        if (optionalUser.get().getLobby() == null || optionalUser.get().getLobby().getState() < 2) {
+            throw new Exception("You can only view this page when you're in a game");
+        }
+
+        Map map = new HashMap();
+        map.put("lobby", optionalUser.get().getLobby());
+        map.put("userid", optionalUser.get().getId());
+        int actionsPerformed = optionalUser.get().getPlayer().getActionsPerformed();
+
+        NightAction[] nightActions = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()).getNightActions(optionalUser.get().getLobby());
+
+        if (actionsPerformed < nightActions.length) {
+            map.put("nightAction", nightActions[actionsPerformed]);
+        }
+
+        return freemarkerService.parseTemplate("gameNightAction", map);
+    }
+
+    @MessageMapping("/requestCreateLobby")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestCreateLobby(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        return freemarkerService.parseTemplate("createLobby", null);
+    }
+
+    @MessageMapping("/requestLobby/{lobbyId}")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestLobby(@DestinationVariable String lobbyId, Principal principal) throws Exception {
+        if (lobbyId == null) {
+            throw new Exception("Invalid lobbyId");
+        }
+
+        if (lobbyId.length() < 1) {
+            throw new Exception("lobbyId has invalid length");
+        }
+
+        Integer lobbyInt = null;
+        try {
+            lobbyInt = Integer.parseInt(lobbyId);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if (lobbyInt == null || lobbyInt < 1) {
+            throw new Exception("Bad lobbyInt");
+        }
+
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        Optional<Lobby> optionalLobby = lobbyService.findLobbyById(lobbyInt);
+
+        if (!optionalLobby.isPresent()) {
+            throw new Exception("could not find a lobby with the given id");
+        }
+
+        Map map = new HashMap();
+        map.put("lobby", optionalLobby.get());
+        map.put("user", optionalUser.get());
+
+        return freemarkerService.parseTemplate("lobby", map);
+    }
+
+    @MessageMapping("/requestRoleReveal")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestRoleReveal(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        if (optionalUser.get().getPlayer() == null) {
+            throw new Exception("Can't reveal role when user has no role!");
+        }
+
+        Map map = new HashMap();
+        map.put("roleName", playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()).getName());
+
+        return freemarkerService.parseTemplate("gameRoleReveal", map);
+    }
+
+    // @MessageMapping("/joinLobby")
+    // @SendTo(value = "/endpoint/broadcast")
+    @MessageMapping("/joinLobby")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> joinLobby(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
+        String lobbyIdString = webSocketRequestMessage.getValue();
+        Integer lobbyId = null;
+        try {
+            lobbyId = Integer.parseInt(lobbyIdString);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if (lobbyId == null) {
             return errorResponse("boardId can't be null");
         }
 
@@ -62,17 +273,25 @@ public class WebSocketController {
             return errorResponse("could not find the user this message came from");
         }
 
-        Optional<Lobby> optionalLobby = lobbyService.joinLobby(boardId, optionalUser.get());
+        Optional<Lobby> optionalLobby = lobbyService.joinLobby(lobbyId, optionalUser.get());
         if (!optionalLobby.isPresent()) {
             return errorResponse("failed to join the lobby");
         }
 
-        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
-        webSocketResponseMessage.setAction("loadlobby");
-        webSocketResponseMessage.setContent(optionalLobby.get());
-        webSocketResponseMessage.setStatus(200);
+        if (optionalLobby.get().getState() == 1) {
+            Map map = new HashMap();
+            map.put("lobby", optionalLobby.get());
+            map.put("user", optionalUser.get());
 
-        return webSocketResponseMessage;
+            return freemarkerService.parseTemplate("lobby", map);
+        } else {
+            WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
+            webSocketResponseMessage.setAction("nothing");
+            webSocketResponseMessage.setContent("success");
+            webSocketResponseMessage.setStatus(200);
+
+            return webSocketResponseMessage;
+        }
     }
 
     @MessageMapping("/getLobbies")
@@ -178,6 +397,7 @@ public class WebSocketController {
 
         lobby.setName(optionalUser.get().getNickname() + "'s Lobby");
         lobby.setLobbyMaxSize(webSocketRequestMessage.getValue().getVal());
+        lobby.setState(1);
 
         lobbyService.save(lobby);
 

@@ -39,10 +39,12 @@ public class LobbyController {
         return "lobbies";
     }
 
+    /*
     @GetMapping("/createLobby")
     public String getCreateLobby() {
         return "createLobby";
     }
+    */
 
     @GetMapping("/lobby/{lobbyId}")
     public String getLobby(@PathVariable(name = "lobbyId") Integer lobbyId, Model model) throws Exception {

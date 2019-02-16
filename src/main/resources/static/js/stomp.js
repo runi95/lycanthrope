@@ -85,7 +85,7 @@ function getLobbies() {
     stompClient.send("/websock/getLobbies", {}, null);
 }
 
-function joinLobby(lobbyId) {
+function requestJoinLobby(lobbyId) {
     stompClient.send("/websock/joinLobby", {}, JSON.stringify({"action": "join", "value": lobbyId}));
 }
 
@@ -103,4 +103,38 @@ function hunterKill(id) {
 
 function voteAction(id) {
     stompClient.send("/websock/voteAction", {}, JSON.stringify({"action": "voteaction", "value": id}));
+}
+
+function requestGameResult(id) {
+    stompClient.send("/websock/requestGameResult/" + id, {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+function requestVoteAction() {
+    stompClient.send("/websock/requestVoteAction", {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+function requestGame() {
+    stompClient.send("/websock/requestGame", {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+function requestNightAction() {
+    stompClient.send("/websock/requestNightAction", {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+function requestLobby(id) {
+    stompClient.send("/websock/requestLobby/" + id, {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+function requestRoleReveal() {
+    stompClient.send("/websock/requestRoleReveal", {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+
+/*
+function requestLobbies() {
+    stompClient.send("/websock/requestLobbies", {}, JSON.stringify({"action": "changeView", "value": ""}));
+}
+*/
+
+function requestCreateLobby() {
+    stompClient.send("/websock/requestCreateLobby", {}, JSON.stringify({"action": "changeView", "value": ""}));
 }
