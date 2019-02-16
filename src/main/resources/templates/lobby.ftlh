@@ -44,5 +44,5 @@
     </#if>
 </div>
 <script>
-    currentLobbyId = "${lobby.id}";
+    currentLobbyId = ${lobby.id};
 </script>
