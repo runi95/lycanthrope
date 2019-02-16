@@ -577,6 +577,9 @@ public class LobbyService {
 
         gameResultService.save(gameResult);
 
+        // The game is over, we don't need this lobby anymore
+        lobbyRepository.delete(optionalLobby.get());
+
         WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setStatus(200);
         webSocketResponseMessage.setAction("requestGameEndAction");
