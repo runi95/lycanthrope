@@ -12,7 +12,7 @@ import java.util.Optional;
 public class GameResultService {
 
     @Autowired
-    GameResultRepository gameResultRepository;
+    private GameResultRepository gameResultRepository;
 
     public void save(GameResult gameResult) {
         gameResultRepository.save(gameResult);

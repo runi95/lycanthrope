@@ -1,13 +1,13 @@
 package lycanthrope.authentication;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import lycanthrope.models.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import lycanthrope.models.User;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class UserPrincipal implements UserDetails {
     private User user;

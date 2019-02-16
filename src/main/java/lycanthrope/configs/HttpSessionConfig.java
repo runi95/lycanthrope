@@ -1,13 +1,13 @@
 package lycanthrope.configs;
 
+import lycanthrope.authentication.UserPrincipal;
+import lycanthrope.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextImpl;
-import lycanthrope.authentication.UserPrincipal;
-import lycanthrope.services.UserService;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -18,7 +18,7 @@ public class HttpSessionConfig {
     private Logger logger = LoggerFactory.getLogger(HttpSessionConfig.class);
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Bean                           // bean for http session listener
     public HttpSessionListener httpSessionListener() {

@@ -12,7 +12,7 @@ import java.util.Optional;
 public class GameResultPlayerService {
 
     @Autowired
-    GameResultPlayerRepository gameResultPlayerRepository;
+    private GameResultPlayerRepository gameResultPlayerRepository;
 
     public List<GameResultPlayer> findAll() {
         return gameResultPlayerRepository.findAll();

@@ -1,5 +1,9 @@
 package lycanthrope.configs;
 
+import lycanthrope.models.Lobby;
+import lycanthrope.models.User;
+import lycanthrope.models.WebSocketResponseMessage;
+import lycanthrope.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +16,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import lycanthrope.models.Lobby;
-import lycanthrope.models.User;
-import lycanthrope.models.WebSocketResponseMessage;
-import lycanthrope.services.LobbyService;
-import lycanthrope.services.UserService;
 
 import java.util.Optional;
 
@@ -27,13 +26,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    LobbyService lobbyService;
-
-    @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry messageBrokerRegistry) {

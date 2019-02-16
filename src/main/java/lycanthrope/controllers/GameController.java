@@ -1,10 +1,5 @@
 package lycanthrope.controllers;
 
-import lycanthrope.models.GameResult;
-import lycanthrope.models.NightAction;
-import lycanthrope.models.PlayerRole;
-import lycanthrope.models.User;
-import lycanthrope.models.roles.Insomniac;
 import lycanthrope.services.GameResultService;
 import lycanthrope.services.PlayerRoleService;
 import lycanthrope.services.UserService;
@@ -16,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 @Controller
 public class GameController {
@@ -30,7 +24,7 @@ public class GameController {
     @Autowired
     private GameResultService gameResultService;
 
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /*
     @GetMapping("/game")

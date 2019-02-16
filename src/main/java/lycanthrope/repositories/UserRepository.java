@@ -1,7 +1,7 @@
 package lycanthrope.repositories;
 
-import org.springframework.data.repository.CrudRepository;
 import lycanthrope.models.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 

@@ -1,5 +1,6 @@
 package lycanthrope.configs;
 
+import lycanthrope.services.AuthUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import lycanthrope.services.AuthUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -18,7 +18,7 @@ import lycanthrope.services.AuthUserDetailsService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    AuthUserDetailsService authUserDetailsService;
+    private AuthUserDetailsService authUserDetailsService;
 
     // This is where we'd use BCrypt if we had any passwords to store.
 

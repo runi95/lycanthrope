@@ -1,8 +1,7 @@
 package lycanthrope.controllers;
 
-import freemarker.template.Template;
+import lycanthrope.models.*;
 import lycanthrope.models.roles.Hunter;
-import lycanthrope.models.roles.Werewolf;
 import lycanthrope.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,18 +11,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
-import lycanthrope.models.*;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfig;
 
-import java.io.StringWriter;
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Controller
 public class WebSocketController {
