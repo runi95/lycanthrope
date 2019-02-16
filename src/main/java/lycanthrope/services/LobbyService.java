@@ -130,7 +130,6 @@ public class LobbyService {
 
                     int one = iterator.next().ordinal();
                     int two = iterator.next().ordinal();
-                    ;
                     int three = iterator.next().ordinal();
 
                     lobby.setNeutralOne(one);
