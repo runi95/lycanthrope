@@ -393,6 +393,12 @@ public class LobbyService {
     }
 
     private void scheduleVoteAction(int lobbyId) {
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (optionalLobby.isPresent()) {
+            optionalLobby.get().setState(5);
+            lobbyRepository.save(optionalLobby.get());
+        }
+
         WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setStatus(200);
         webSocketResponseMessage.setAction("requestVoteAction");
