@@ -308,7 +308,7 @@ public class WebSocketController {
     }
 
     @MessageMapping("/createLobby")
-    @SendToUser(value = "/endpoint/private")
+    @SendTo("/endpoint/broadcast")
     public WebSocketResponseMessage<Pair<Lobby, String>> createLobby(WebSocketRequestMessage<Pair<Map<String, String>, Integer>> webSocketRequestMessage, Principal principal) throws Exception {
         // As long as our SecurityConfig works as intended this will never be true
         if (principal == null) {

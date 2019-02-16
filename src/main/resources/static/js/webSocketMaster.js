@@ -29,9 +29,6 @@ function handleActions(message) {
         case "joinLobby":
             joinLobby(message.content);
             break;
-        case "loadlobby":
-            loadLobby(message.content);
-            break;
         case "disconnected":
             disconnectPlayer(message.content);
             break;
