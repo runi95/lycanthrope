@@ -8,7 +8,20 @@
                 <hr>
                 <button class="btn btn-block btn-primary" onclick="getCreateLobbyView()">Create Lobby</button>
                 <div id="lobbytable" class="d-flex flex-column">
-
+                    <#list lobbyList as lobby>
+                        <div>
+                            <h4>
+                                ${lobby.name}
+                            </h4>
+                            <hr>
+                            <div id="${lobby.id}s">
+                                ${lobby.currentPlayerSize}/${lobby.lobbyMaxSize}
+                            </div>
+                            <button class="btn btn-primary" onclick="joinLobbyRequest(${lobby.id})">
+                                Join
+                            </button>
+                        </div>
+                    </#list>
                 </div>
             </div>
         </div>

@@ -1,4 +1,3 @@
-var lobbies = {};
 var currentLobbyId;
 // var playerNumber;
 
@@ -63,8 +62,6 @@ function setTime(time) {
 }
 
 function populateNewLobby(newLobby) {
-    lobbies[newLobby.key.id] = newLobby.key;
-
     if ($("meta[name=nickname]").attr("content") === newLobby.val) {
         createLobbyPrivate(newLobby.key);
     } else {
@@ -95,7 +92,7 @@ function addLobbyToLobbyTable(lobby) {
     var lobbySize = document.createElement("div");
     var btn = document.createElement("button");
     btn.classList.add("btn", "btn-primary");
-    btn.setAttribute("onClick", "joinLobbyRequest(" + lobby.id + ")");
+    btn.setAttribute("onclick", "joinLobbyRequest(" + lobby.id + ")");
 
     name.appendChild(document.createTextNode(lobby.name));
     lobbySize.appendChild(document.createTextNode(lobby.currentPlayerSize + "/" + lobby.lobbyMaxSize));

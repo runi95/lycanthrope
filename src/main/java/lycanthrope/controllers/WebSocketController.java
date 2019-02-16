@@ -258,7 +258,10 @@ public class WebSocketController {
             throw new Exception("Could not find a user with the given nickname");
         }
 
-        return freemarkerService.parseTemplate("lobbies", null);
+        Map map = new HashMap();
+        map.put("lobbyList", lobbyService.getAllLobbies());
+
+        return freemarkerService.parseTemplate("lobbies", map);
     }
 
     @MessageMapping("/joinLobby")
