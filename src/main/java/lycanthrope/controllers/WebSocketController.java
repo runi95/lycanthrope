@@ -245,8 +245,22 @@ public class WebSocketController {
         return freemarkerService.parseTemplate("gameRoleReveal", map);
     }
 
-    // @MessageMapping("/joinLobby")
-    // @SendTo(value = "/endpoint/broadcast")
+    @MessageMapping("/requestLobbies")
+    @SendToUser(value = "/endpoint/private")
+    public WebSocketResponseMessage<String> requestLobbies(Principal principal) throws Exception {
+        // As long as our SecurityConfig works as intended this will never be true
+        if (principal == null) {
+            throw new Exception("Unauthorized");
+        }
+
+        Optional<User> optionalUser = userService.findByNickname(principal.getName());
+        if (!optionalUser.isPresent()) {
+            throw new Exception("Could not find a user with the given nickname");
+        }
+
+        return freemarkerService.parseTemplate("lobbies", null);
+    }
+
     @MessageMapping("/joinLobby")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> joinLobby(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
@@ -762,53 +776,4 @@ public class WebSocketController {
 
         return freemarkerService.parseTemplate("gameNightAction", map);
     }
-
-    /*
-    private WebSocketResponseMessage<String> performDoppelgangerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed == 1) {
-            user.getPlayer().setActionsPerformed(0);
-            int targetUserId = Integer.parseInt(messageValue.substring(1));
-            Optional<User> optionalTargetUser = userService.findById(targetUserId);
-            if (!optionalTargetUser.isPresent()) {
-                throw new Exception("Could not find a user with the given target id");
-            }
-
-            return performNightAction(user, messageValue, optionalTargetUser.get().getPlayer().getRoleId());
-        } else {
-            throw new Exception("You have already performed all your actions");
-        }
-    }
-
-    private WebSocketResponseMessage<String> performDoppelgangerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed == 0 && user.getPlayer().getDoppelgangerTargetId() == null) {
-            // user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-            // user.getPlayer().setNightActionTarget(messageValue);
-            PlayerRole targetRole = playerRoleService.getRole(target.getPlayer().getRoleId());
-
-            user.getPlayer().setRoleId(target.getPlayer().getRoleId());
-            user.getPlayer().setDoppelgangerTargetId(target.getId());
-            playerService.save(user.getPlayer());
-
-            NightAction[] nightActions;
-            if (targetRole instanceof Werewolf) {
-                nightActions = new NightAction[]{};
-            } else {
-                nightActions = targetRole.getNightActions(user.getLobby());
-            }
-
-            Map map = new HashMap();
-            map.put("viewRole", targetRole.getName());
-            map.put("userid", user.getId());
-            map.put("lobby", user.getLobby());
-
-            if (nightActions.length > 0) {
-                map.put("nightAction", nightActions[0]);
-            }
-
-            return freemarkerService.parseTemplate("gameNightAction", map);
-        } else {
-            throw new Exception("You have already performed all your actions");
-        }
-    }
-    */
 }

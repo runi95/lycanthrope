@@ -27,26 +27,6 @@
     var roleName = "${roleName}";
     var isRoleRevealed = false;
 
-    /*
-    var progress = 100;
-    var intervalInMilliseconds = 1000 / 100 * 10;
-    var intervalTimer = setInterval(updateProgressBar, intervalInMilliseconds);
-
-    function updateProgressBar() {
-        if (progress > 0) {
-            var elem = document.getElementById("progressbar");
-            progress--;
-            elem.setAttribute("style", "width: " + progress + "%");
-        } else {
-            if (progress > -5) {
-                progress--;
-            } else {
-                revealRole();
-            }
-        }
-    }
-    */
-
     function revealRole() {
         if (!isRoleRevealed) {
             isRoleRevealed = true;

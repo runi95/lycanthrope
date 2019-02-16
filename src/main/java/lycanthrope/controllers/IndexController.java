@@ -33,6 +33,11 @@ public class IndexController {
         return "index";
     }
 
+    @GetMapping(value = "/lobbiesIndex")
+    public String getLobbiesIndex() {
+        return "lobbiesIndex";
+    }
+
     @PostMapping(value = "/setNick")
     public String setNickname(@RequestParam("nickname") String nickname, HttpServletRequest request, Model model) {
         // User's nickname didn't match our naming criteria

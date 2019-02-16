@@ -40,48 +40,6 @@
     }
 </style>
 <script>
-    /*
-    var progress = 100;
-    var startTime = 10 * 60;
-    var timeLeft = 600;
-    var countdownTimerShown = false;
-    var firstVibration = false;
-    var intervalTimer = setInterval(updateProgressBar, 1000);
-
-    function updateProgressBar() {
-        timeLeft--;
-
-        if (timeLeft <= 0) {
-            clearInterval(intervalTimer);
-        }
-
-        if (timeLeft <= 10 && !firstVibration) {
-            firstVibration = true;
-            window.navigator.vibrate(200);
-        }
-
-        if (timeLeft <= 60) {
-            if (!countdownTimerShown) {
-                countdownTimerShown = true;
-                document.getElementById("votecountContainer").setAttribute("style", "");
-                document.getElementById("discusshint").setAttribute("style", "display: none");
-                document.getElementById("votecount").innerText = timeLeft;
-            } else {
-                document.getElementById("votecount").innerText = timeLeft;
-            }
-        }
-
-        var progressMade = 100 * (timeLeft / startTime);
-        if (progress > progressMade) {
-            progress = progressMade;
-
-            var elem = document.getElementById("progressbar");
-            elem.setAttribute("style", "width: " + progress + "%;");
-            elem.setAttribute("aria-valuenow", progress);
-        }
-    }
-    */
-
     function hideSecretMessage() {
         var elem = document.getElementById("secretmsg");
         if (elem) {

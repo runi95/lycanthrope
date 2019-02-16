@@ -65,10 +65,27 @@ function connect() {
             receiveMessage(JSON.parse(message.body));
         });
 
-        // stompClient.event
-        getLobbies();
+        requestLobbies();
     }, function () {
         setConnected(false);
+
+        var connection = document.getElementById("connection");
+        var loader = document.getElementById("loader");
+        if (connection && loader) {
+            var div = document.createElement("div");
+            var span = document.createElement("span");
+            var spanText = document.createElement("span");
+            span.setAttribute("class", "icon fas fa-times");
+            spanText.append(document.createTextNode(" Connection failed!"));
+
+            div.append(span);
+            div.append(spanText);
+            div.setAttribute("id", "connection");
+            div.setAttribute("class", "text-danger");
+
+            connection.remove();
+            loader.appendChild(div);
+        }
     });
 }
 
@@ -79,6 +96,10 @@ function disconnect() {
             setConnected(false);
         });
     }
+}
+
+function requestLobbies() {
+    stompClient.send("/websock/requestLobbies", {}, null);
 }
 
 function getLobbies() {
@@ -131,12 +152,6 @@ function requestLobby(id) {
 function requestRoleReveal() {
     stompClient.send("/websock/requestRoleReveal", {}, JSON.stringify({"action": "changeView", "value": ""}));
 }
-
-/*
-function requestLobbies() {
-    stompClient.send("/websock/requestLobbies", {}, JSON.stringify({"action": "changeView", "value": ""}));
-}
-*/
 
 function requestCreateLobby() {
     stompClient.send("/websock/requestCreateLobby", {}, JSON.stringify({"action": "changeView", "value": ""}));

@@ -36,15 +36,8 @@ public class LobbyController {
 
         model.addAttribute("nickname", optionalUser.get().getNickname());
 
-        return "lobbies";
+        return "lobbiesIndex";
     }
-
-    /*
-    @GetMapping("/createLobby")
-    public String getCreateLobby() {
-        return "createLobby";
-    }
-    */
 
     @GetMapping("/lobby/{lobbyId}")
     public String getLobby(@PathVariable(name = "lobbyId") Integer lobbyId, Model model) throws Exception {

@@ -24,23 +24,6 @@
     }
 </style>
 <script>
-    /*
-    var progress = 100;
-    var intervalInMilliseconds = 1000 / 100 * 60;
-    var intervalTimer = setInterval(updateProgressBar, intervalInMilliseconds);
-
-    function updateProgressBar() {
-        if (progress > 0) {
-            var elem = document.getElementById("progressbar");
-            progress--;
-            elem.setAttribute("style", "width: " + progress + "%;");
-            elem.setAttribute("aria-valuenow", progress);
-        } else {
-            clearInterval(intervalTimer);
-        }
-    }
-    */
-
     function performHunterKill(elem) {
         hunterKill(elem.id);
     }
