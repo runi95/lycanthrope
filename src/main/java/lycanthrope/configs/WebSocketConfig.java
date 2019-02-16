@@ -65,6 +65,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             return;
         }
 
+        // TODO: Find a way so that empty lobbies gets deleted!
         if (optionalUser.get().getLobby().getState() == 1) {
             Lobby lobby = optionalUser.get().getLobby();
             lobby.removeUser(optionalUser.get());
