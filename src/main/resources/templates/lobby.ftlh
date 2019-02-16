@@ -14,7 +14,7 @@
             <div class="col-sm-12">
                 <div class="text-center">
                     <small>Players in lobby</small>
-                    <ul id="lobbytable" class="list-group">
+                    <ul class="list-group">
                         <#list 1..lobby.lobbyMaxSize as i>
                             <#if lobby.currentPlayerSize < i>
                                 <li class="list-group-item list-group-item-empty">Open Slot</li>
