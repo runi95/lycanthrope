@@ -297,8 +297,22 @@ public class WebSocketController {
             return freemarkerService.parseTemplate("lobby", map);
         } else {
             WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
-            webSocketResponseMessage.setAction("nothing");
-            webSocketResponseMessage.setContent("success");
+
+            switch (optionalLobby.get().getState()) {
+                case 2:
+                    webSocketResponseMessage.setAction("requestGameRoleReveal");
+                    break;
+                case 3:
+                    webSocketResponseMessage.setAction("requestNightAction");
+                    break;
+                case 4:
+                    webSocketResponseMessage.setAction("requestGame");
+                    break;
+                case 5:
+                    webSocketResponseMessage.setAction("requestVoteAction");
+                    break;
+            }
+            webSocketResponseMessage.setContent("");
             webSocketResponseMessage.setStatus(200);
 
             return webSocketResponseMessage;
