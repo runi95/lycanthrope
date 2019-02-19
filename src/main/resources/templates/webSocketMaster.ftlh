@@ -6,6 +6,8 @@
     <meta name="description" content="The ultimate board game!">
     <meta charset="UTF-8">
     <meta name="keywords" content="gaming, board games, board, game, board game, space, worms, worm">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="HandheldFriendly" content="true">
 
     <#if _csrf??>
         <meta name="csrf_name" content="<#if _csrf.parameterName??>${_csrf.parameterName}</#if>">
