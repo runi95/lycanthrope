@@ -3,7 +3,7 @@ package lycanthrope.controllers;
 import lycanthrope.models.Lobby;
 import lycanthrope.models.User;
 import lycanthrope.services.LobbyService;
-import lycanthrope.services.UserService;
+import lycanthrope.services.PrincipalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,21 +20,13 @@ public class LobbyController {
     private LobbyService lobbyService;
 
     @Autowired
-    private UserService userService;
+    private PrincipalService principalService;
 
     @GetMapping(value = "/lobbies")
     public String getMainPage(Principal principal, Model model) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        model.addAttribute("nickname", optionalUser.get().getNickname());
+        model.addAttribute("nickname", user.getNickname());
 
         return "lobbiesIndex";
     }

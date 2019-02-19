@@ -11,6 +11,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 @Controller
 public class WebSocketController {
 
@@ -39,6 +42,9 @@ public class WebSocketController {
 
     @Autowired
     private GameResultService gameResultService;
+
+    @Autowired
+    private PrincipalService principalService;
 
     private Logger logger = LoggerFactory.getLogger(WebSocketController.class);
 
@@ -67,10 +73,7 @@ public class WebSocketController {
             throw new Exception("Bad gameResultLong");
         }
 
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        principalService.getUserFromPrincipal(principal);
 
         Optional<GameResult> optionalGameResult = gameResultService.find(gameResultLong);
         if (!optionalGameResult.isPresent()) {
@@ -79,7 +82,7 @@ public class WebSocketController {
 
         String gameEndTime = optionalGameResult.get().getGameEndTime().format(dateTimeFormatter);
 
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("gameresult", optionalGameResult.get());
         map.put("gameEndTime", gameEndTime);
 
@@ -89,20 +92,12 @@ public class WebSocketController {
     @MessageMapping("/requestVoteAction")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestVoteAction(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        Map map = new HashMap();
-        map.put("lobby", optionalUser.get().getLobby());
-        map.put("userid", optionalUser.get().getId());
-        map.put("vote", optionalUser.get().getPlayer().getVote());
+        Map<String, Object> map = new HashMap<>();
+        map.put("lobby", user.getLobby());
+        map.put("userid", user.getId());
+        map.put("vote", user.getPlayer().getVote());
 
         return freemarkerService.parseTemplate("gameVote", map);
     }
@@ -110,20 +105,12 @@ public class WebSocketController {
     @MessageMapping("/requestGame")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestGame(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        Map<String, Object> map = new HashMap<>();
 
-        Map map = new HashMap();
-
-        if (optionalUser.get().getPlayer().isRealInsomniac()) {
-            PlayerRole playerRole = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId());
+        if (user.getPlayer().isRealInsomniac()) {
+            PlayerRole playerRole = playerRoleService.getRole(user.getPlayer().getRoleId());
             map.put("secretMessage", "You wake up as the " + playerRole.getName());
         }
 
@@ -133,26 +120,18 @@ public class WebSocketController {
     @MessageMapping("/requestNightAction")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestNightAction(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        if (optionalUser.get().getLobby() == null || optionalUser.get().getLobby().getState() < 2) {
+        if (user.getLobby() == null || user.getLobby().getState() < 2) {
             throw new Exception("You can only view this page when you're in a game");
         }
 
-        Map map = new HashMap();
-        map.put("lobby", optionalUser.get().getLobby());
-        map.put("userid", optionalUser.get().getId());
-        int actionsPerformed = optionalUser.get().getPlayer().getActionsPerformed();
+        Map<String, Object> map = new HashMap<>();
+        map.put("lobby", user.getLobby());
+        map.put("userid", user.getId());
+        int actionsPerformed = user.getPlayer().getActionsPerformed();
 
-        NightAction[] nightActions = playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()).getNightActions(optionalUser.get().getLobby());
+        NightAction[] nightActions = playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby());
 
         if (actionsPerformed < nightActions.length) {
             map.put("nightAction", nightActions[actionsPerformed]);
@@ -164,15 +143,7 @@ public class WebSocketController {
     @MessageMapping("/requestCreateLobby")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestCreateLobby(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        principalService.getUserFromPrincipal(principal);
 
         return freemarkerService.parseTemplate("createLobby", null);
     }
@@ -199,15 +170,7 @@ public class WebSocketController {
             throw new Exception("Bad lobbyInt");
         }
 
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
         Optional<Lobby> optionalLobby = lobbyService.findLobbyById(lobbyInt);
 
@@ -215,9 +178,9 @@ public class WebSocketController {
             throw new Exception("could not find a lobby with the given id");
         }
 
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("lobby", optionalLobby.get());
-        map.put("user", optionalUser.get());
+        map.put("user", user);
 
         return freemarkerService.parseTemplate("lobby", map);
     }
@@ -225,22 +188,14 @@ public class WebSocketController {
     @MessageMapping("/requestRoleReveal")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestRoleReveal(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        if (optionalUser.get().getPlayer() == null) {
+        if (user.getPlayer() == null) {
             throw new Exception("Can't reveal role when user has no role!");
         }
 
-        Map map = new HashMap();
-        map.put("roleName", playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()).getName());
+        Map<String, Object> map = new HashMap<>();
+        map.put("roleName", playerRoleService.getRole(user.getPlayer().getRoleId()).getName());
 
         return freemarkerService.parseTemplate("gameRoleReveal", map);
     }
@@ -248,17 +203,9 @@ public class WebSocketController {
     @MessageMapping("/requestLobbies")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> requestLobbies(Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
+        principalService.getUserFromPrincipal(principal);
 
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
-
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("lobbyList", lobbyService.getAllLobbies());
 
         return freemarkerService.parseTemplate("lobbies", map);
@@ -290,7 +237,7 @@ public class WebSocketController {
         }
 
         if (optionalLobby.get().getState() == 1) {
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("lobby", optionalLobby.get());
             map.put("user", optionalUser.get());
 
@@ -335,15 +282,7 @@ public class WebSocketController {
     @MessageMapping("/createLobby")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<Integer> createLobby(WebSocketRequestMessage<Pair<Map<String, String>, Integer>> webSocketRequestMessage, Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
         Lobby lobby = new Lobby();
 
@@ -419,17 +358,17 @@ public class WebSocketController {
             }
         }
 
-        lobby.setName(optionalUser.get().getNickname() + "'s Lobby");
+        lobby.setName(user.getNickname() + "'s Lobby");
         lobby.setLobbyMaxSize(webSocketRequestMessage.getValue().getVal());
         lobby.setState(1);
 
         lobbyService.save(lobby);
 
-        lobby.addUser(optionalUser.get());
+        lobby.addUser(user);
 
         lobbyService.save(lobby);
 
-        lobbyService.broadcastCreateLobby(lobby, optionalUser.get().getNickname());
+        lobbyService.broadcastCreateLobby(lobby, user.getNickname());
 
         WebSocketResponseMessage<Integer> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setAction("requestJoinLobby");
@@ -442,69 +381,44 @@ public class WebSocketController {
     @MessageMapping("/nightAction")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> nightAction(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
         if (webSocketRequestMessage.getValue() == null || webSocketRequestMessage.getValue().length() < 1) {
             throw new Exception("Could not understand performed action");
         }
 
-        return performNightAction(optionalUser.get(), webSocketRequestMessage.getValue(), optionalUser.get().getPlayer().getRoleId());
+        return performNightAction(user, webSocketRequestMessage.getValue(), user.getPlayer().getRoleId());
     }
 
-    // @SendToUser(value = "/endpoint/private")
     @MessageMapping("/voteAction")
     @SendTo(value = "/endpoint/broadcast/{lobbyId}")
-    public WebSocketResponseMessage<String> voteAction(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+    public WebSocketResponseMessage<PlayerVoteAction> voteAction(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
+        User user = principalService.getUserFromPrincipal(principal);
 
         if (webSocketRequestMessage.getValue() == null || webSocketRequestMessage.getValue().length() < 1) {
             throw new Exception("Could not understand performed action");
         }
 
-        return performVoteAction(optionalUser.get(), webSocketRequestMessage.getValue());
+        return performVoteAction(user, webSocketRequestMessage.getValue());
     }
 
     @MessageMapping("/hunterKill")
     @SendToUser(value = "/endpoint/private")
     public WebSocketResponseMessage<String> hunterKill(WebSocketRequestMessage<String> webSocketRequestMessage, Principal principal) throws Exception {
-        // As long as our SecurityConfig works as intended this will never be true
-        if (principal == null) {
-            throw new Exception("Unauthorized");
-        }
-
-        Optional<User> optionalUser = userService.findByNickname(principal.getName());
-        if (!optionalUser.isPresent()) {
-            throw new Exception("Could not find a user with the given nickname");
-        }
+        User user = principalService.getUserFromPrincipal(principal);
 
         if (webSocketRequestMessage.getValue() == null || webSocketRequestMessage.getValue().length() < 1) {
             throw new Exception("Could not understand performed action");
         }
 
-        if (!(playerRoleService.getRole(optionalUser.get().getPlayer().getRoleId()) instanceof Hunter)) {
+        if (!(playerRoleService.getRole(user.getPlayer().getRoleId()) instanceof Hunter)) {
             throw new Exception("This role can't perform a hunter kill");
         }
 
-        optionalUser.get().getLobby().setHunterKill(webSocketRequestMessage.getValue());
-        lobbyService.save(optionalUser.get().getLobby());
+        user.getLobby().setHunterKill(webSocketRequestMessage.getValue());
+        lobbyService.save(user.getLobby());
 
-        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setAction("hunterKill");
         webSocketResponseMessage.setContent(webSocketRequestMessage.getValue());
         webSocketResponseMessage.setStatus(200);
@@ -512,10 +426,10 @@ public class WebSocketController {
         return webSocketResponseMessage;
     }
 
-    private WebSocketResponseMessage errorResponse(String message) {
+    private WebSocketResponseMessage<String> errorResponse(String message) {
         logger.warn(message);
 
-        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        WebSocketResponseMessage<String> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setContent(message);
         webSocketResponseMessage.setStatus(500);
 
@@ -546,7 +460,7 @@ public class WebSocketController {
                 case 4: // Robber
                     return performRobberAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
                 case 5: // Seer
-                    return performSeerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
+                    return performSeerAction(user, user.getPlayer().getActionsPerformed(), messageValue);
                 /*
                 case 10: // Doppelganger
                     return performDoppelgangerAction(user, optionalTargetUser.get(), user.getPlayer().getActionsPerformed(), messageValue);
@@ -579,19 +493,17 @@ public class WebSocketController {
         } else {
             throw new Exception("Could not understand what target you chose");
         }
-
-        // throw new Exception("Something went wrong");
     }
 
-    private WebSocketResponseMessage<String> performVoteAction(User user, String messageValue) throws Exception {
-        int targetUserId = Integer.parseInt(messageValue.substring(1));
+    private WebSocketResponseMessage<PlayerVoteAction> performVoteAction(User user, String messageValue) throws Exception {
+        int votedUserId = Integer.parseInt(messageValue.substring(1));
 
-        Optional<User> optionalTargetUser = userService.findById(targetUserId);
-        if (!optionalTargetUser.isPresent()) {
+        Optional<User> optionalVotedUser = userService.findById(votedUserId);
+        if (!optionalVotedUser.isPresent()) {
             throw new Exception("Could not find a user with the given target id");
         }
 
-        if (user.getLobby().getId() != optionalTargetUser.get().getLobby().getId()) {
+        if (user.getLobby().getId() != optionalVotedUser.get().getLobby().getId()) {
             throw new Exception("Someone tried to vote for a user that isn't in their lobby");
         }
 
@@ -600,31 +512,34 @@ public class WebSocketController {
         if (user.getPlayer().getVote() != null && user.getPlayer().getVote().length() > 0) {
             int previousVoteUserId = Integer.parseInt(user.getPlayer().getVote().substring(1));
             Optional<User> optionalPreviousVoteUser = userService.findById(previousVoteUserId);
+            if (!optionalPreviousVoteUser.isPresent()) {
+                throw new Exception("Voting player had invalid getVote()");
+            }
 
             playerVoteAction.setPreviousVote(user.getPlayer().getVote());
             optionalPreviousVoteUser.get().getPlayer().setVotesAgainstPlayer(optionalPreviousVoteUser.get().getPlayer().getVotesAgainstPlayer() - 1);
             playerService.save(optionalPreviousVoteUser.get().getPlayer());
-            playerVoteAction.setPreviousVotes(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer());
+            playerVoteAction.setPreviousVotes(optionalVotedUser.get().getPlayer().getVotesAgainstPlayer());
         }
 
         if (user.getPlayer().getVote() != null && user.getPlayer().getVote().length() > 0 && user.getPlayer().getVote().equals(messageValue)) {
             user.getPlayer().setVote(null);
-            optionalTargetUser.get().getPlayer().setVotesAgainstPlayer(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer() - 1);
+            optionalVotedUser.get().getPlayer().setVotesAgainstPlayer(optionalVotedUser.get().getPlayer().getVotesAgainstPlayer() - 1);
             playerVoteAction.setVoteIndicator("-");
         } else {
             user.getPlayer().setVote(messageValue);
-            optionalTargetUser.get().getPlayer().setVotesAgainstPlayer(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer() + 1);
+            optionalVotedUser.get().getPlayer().setVotesAgainstPlayer(optionalVotedUser.get().getPlayer().getVotesAgainstPlayer() + 1);
             playerVoteAction.setVoteIndicator("+");
         }
 
         userService.save(user);
-        playerService.save(optionalTargetUser.get().getPlayer());
+        playerService.save(optionalVotedUser.get().getPlayer());
 
         playerVoteAction.setVoter(user.getNickname());
-        playerVoteAction.setVotedFor("u" + optionalTargetUser.get().getId());
-        playerVoteAction.setVotes(optionalTargetUser.get().getPlayer().getVotesAgainstPlayer());
+        playerVoteAction.setVotedFor("u" + optionalVotedUser.get().getId());
+        playerVoteAction.setVotes(optionalVotedUser.get().getPlayer().getVotesAgainstPlayer());
 
-        WebSocketResponseMessage webSocketResponseMessage = new WebSocketResponseMessage();
+        WebSocketResponseMessage<PlayerVoteAction> webSocketResponseMessage = new WebSocketResponseMessage<>();
         webSocketResponseMessage.setAction("updateVotes");
         webSocketResponseMessage.setContent(playerVoteAction);
         webSocketResponseMessage.setStatus(200);
@@ -644,7 +559,7 @@ public class WebSocketController {
             user.getPlayer().setNightActionTarget(messageValue);
             playerService.save(user.getPlayer());
 
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("smallMessage", "Swapping " + target.getNickname() + " with...");
             map.put("nightAction", playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby())[actionsPerformed]);
             map.put("firstTarget", messageValue);
@@ -658,18 +573,10 @@ public class WebSocketController {
     }
 
     private WebSocketResponseMessage<String> performRobberAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed > 0) {
-            throw new Exception("You have already performed all your actions");
-        }
-
-        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-        user.getPlayer().setNightActionTarget(messageValue);
-        playerService.save(user.getPlayer());
-
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
 
-        return freemarkerService.parseTemplate("gameNightAction", map);
+        return performSetAction(user, actionsPerformed, messageValue, map);
     }
 
     private WebSocketResponseMessage<String> performSeerAction(User user, int targetNeutralId, int actionsPerformed, String messageValue) throws Exception {
@@ -677,12 +584,16 @@ public class WebSocketController {
             throw new IllegalArgumentException("targetNeutralId can't be greater than 3 or less than 1");
         }
 
-        if (actionsPerformed == 0) {
+        if (actionsPerformed == 0 || (actionsPerformed == 1 && user.getPlayer().getNightActionTarget() != null && user.getPlayer().getNightActionTarget().length() > 0 && user.getPlayer().getNightActionTarget().charAt(0) == 'n')) {
             user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-            user.getPlayer().setNightActionTarget(messageValue);
+            if (actionsPerformed == 0) {
+                user.getPlayer().setNightActionTarget(messageValue);
+            } else {
+                user.getPlayer().setNightActionTargetTwo(messageValue);
+            }
             playerService.save(user.getPlayer());
 
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             switch (targetNeutralId) {
                 case 1:
                     map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralOne()).getName());
@@ -696,28 +607,9 @@ public class WebSocketController {
             }
 
             map.put("nightAction", playerRoleService.getRole(user.getPlayer().getRoleId()).getNightActions(user.getLobby())[1]);
-            map.put("firstTarget", messageValue);
+            map.put("firstTarget", user.getPlayer().getNightActionTarget());
             map.put("userid", user.getId());
             map.put("lobby", user.getLobby());
-
-            return freemarkerService.parseTemplate("gameNightAction", map);
-        } else if (actionsPerformed == 1 && user.getPlayer().getNightActionTarget() != null && user.getPlayer().getNightActionTarget().length() > 0 && user.getPlayer().getNightActionTarget().charAt(0) == 'n') {
-            user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-            user.getPlayer().setNightActionTarget(messageValue);
-            playerService.save(user.getPlayer());
-
-            Map map = new HashMap();
-            switch (targetNeutralId) {
-                case 1:
-                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralOne()).getName());
-                    break;
-                case 2:
-                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralTwo()).getName());
-                    break;
-                case 3:
-                    map.put("viewRole", playerRoleService.getRole(user.getLobby().getNeutralThree()).getName());
-                    break;
-            }
 
             return freemarkerService.parseTemplate("gameNightAction", map);
         } else {
@@ -725,7 +617,7 @@ public class WebSocketController {
         }
     }
 
-    private WebSocketResponseMessage<String> performSeerAction(User user, User target, int actionsPerformed, String messageValue) throws Exception {
+    private WebSocketResponseMessage<String> performSetAction(User user, int actionsPerformed, String messageValue, Map map) throws Exception {
         if (actionsPerformed > 0) {
             throw new Exception("You have already performed all your actions");
         }
@@ -734,22 +626,15 @@ public class WebSocketController {
         user.getPlayer().setNightActionTarget(messageValue);
         playerService.save(user.getPlayer());
 
-        Map map = new HashMap();
-        map.put("viewRole", playerRoleService.getRole(target.getPlayer().getRoleId()).getName());
+        return freemarkerService.parseTemplate("gameNightAction", map);
+    }
 
-        return freemarkerService.parseTemplate("gameNightAction", null);
+    private WebSocketResponseMessage<String> performSeerAction(User user, int actionsPerformed, String messageValue) throws Exception {
+        return performSetAction(user, actionsPerformed, messageValue, null);
     }
 
     private WebSocketResponseMessage<String> performDrunkAction(User user, int actionsPerformed, String messageValue) throws Exception {
-        if (actionsPerformed > 0) {
-            throw new Exception("You have already performed all your actions");
-        }
-
-        user.getPlayer().setActionsPerformed(user.getPlayer().getActionsPerformed() + 1);
-        user.getPlayer().setNightActionTarget(messageValue);
-        playerService.save(user.getPlayer());
-
-        return freemarkerService.parseTemplate("gameNightAction", null);
+        return performSetAction(user, actionsPerformed, messageValue, null);
     }
 
     private WebSocketResponseMessage<String> performWerewolfAction(User user, int actionsPerformed, String messageValue) throws Exception {
@@ -788,7 +673,7 @@ public class WebSocketController {
             throw new Exception("performWerewolfAction somehow got a null roleId");
         }
 
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("viewRole", playerRoleService.getRole(roleId).getName());
 
         return freemarkerService.parseTemplate("gameNightAction", map);
